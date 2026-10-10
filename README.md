@@ -71,7 +71,7 @@ The CLI's registry contract snapshot lets its parity tests run without the Unmap
 Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 This repository is automatically exported from Unmap's product monorepo, which remains
 the authoritative source during the release migration. Maintainers apply accepted changes
-there and the export updates this repository. npm and CDN releases continue through the
+there and the public sync workflow updates this repository hourly, or on manual dispatch. npm and CDN releases continue through the
 existing trusted publishing workflow; this repository does not publish packages independently.
 
 ## License
