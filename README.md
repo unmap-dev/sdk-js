@@ -78,3 +78,5 @@ existing trusted publishing workflow; this repository does not publish packages 
 
 [MIT](LICENSE). Dependencies retain their own licenses. The license covers this source code;
 using the hosted Unmap API requires an API key and is subject to its service terms and quotas.
+
+More runnable API examples, templates, and React/Vue blocks: [unmap-dev/examples](https://github.com/unmap-dev/examples).
