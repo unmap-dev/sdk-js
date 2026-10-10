@@ -1,0 +1,50 @@
+{
+  "name": "@unmap/core",
+  "version": "0.20.0",
+  "description": "unmap tile math and gateway URL helpers (zero-dependency, isomorphic)",
+  "license": "MIT",
+  "keywords": [
+    "unmap",
+    "maps",
+    "canada",
+    "maplibre",
+    "tiles",
+    "web-mercator"
+  ],
+  "homepage": "https://unmap.dev/docs/apis/maps",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unmap-dev/sdk-js.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/unmap-dev/sdk-js/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

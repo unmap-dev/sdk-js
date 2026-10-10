@@ -1,0 +1,14 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    // `build` as well as `^build`, which the root task deliberately does not do: the CDN bundle
+    // assertions in src/browser-bundle.test.ts read dist-browser/, so these tests have to run
+    // after this package's own build, not only after its dependencies'. Scoped here rather than
+    // at the root so nothing else in the repo pays for it (apps/registry/turbo.json is the
+    // precedent for a per-package task override).
+    "test": {
+      "dependsOn": ["^build", "build"]
+    }
+  }
+}

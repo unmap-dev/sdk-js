@@ -1,0 +1,26 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [
+    [
+      "@unmap/sdk",
+      "@unmap/core",
+      "@unmap/maps",
+      "@unmap/geocoding",
+      "@unmap/routing",
+      "@unmap/elevation",
+      "@unmap/themes",
+      "@unmap/vue",
+      "@unmap/nuxt",
+      "@unmap/react",
+      "@unmap/next",
+      "@unmap/cli"
+    ]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": []
+}

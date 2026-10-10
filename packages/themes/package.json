@@ -1,0 +1,57 @@
+{
+  "name": "@unmap/themes",
+  "version": "0.20.0",
+  "description": "unmap theme documents: types, recipes, validation, codec (data-only map themes)",
+  "license": "MIT",
+  "keywords": [
+    "unmap",
+    "maps",
+    "canada",
+    "maplibre",
+    "theme",
+    "cartography"
+  ],
+  "homepage": "https://unmap.dev/create",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unmap-dev/sdk-js.git",
+    "directory": "packages/themes"
+  },
+  "bugs": {
+    "url": "https://github.com/unmap-dev/sdk-js/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "preset-codes": "node scripts/preset-codes.mjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@protomaps/basemaps": "^5.7.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

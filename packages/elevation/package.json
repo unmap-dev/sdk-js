@@ -1,0 +1,52 @@
+{
+  "name": "@unmap/elevation",
+  "version": "0.20.0",
+  "description": "Typed client for the unmap DEM elevation API",
+  "license": "MIT",
+  "keywords": [
+    "unmap",
+    "elevation",
+    "dem",
+    "terrain",
+    "canada"
+  ],
+  "homepage": "https://unmap.dev/docs/apis/elevation",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unmap-dev/sdk-js.git",
+    "directory": "packages/elevation"
+  },
+  "bugs": {
+    "url": "https://github.com/unmap-dev/sdk-js/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@unmap/core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

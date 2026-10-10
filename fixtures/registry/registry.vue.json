@@ -1,0 +1,472 @@
+{
+  "items": [
+    {
+      "name": "map-context",
+      "type": "registry:lib",
+      "files": [
+        {
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "map-themes",
+      "type": "registry:lib",
+      "files": [
+        {
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "map-layers",
+      "type": "registry:lib",
+      "files": [
+        {
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "map",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "geocoder",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "routing-panel",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "route-line",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "geojson-layer",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "cluster-layer",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "heatmap-layer",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "arc-layer",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "flow-layer",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "marker-popup",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "map-controls",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "layer-legend",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "measure",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "feature-inspector",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "time-slider",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "draw",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "compare-swipe",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "elevation-profile",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "store-locator",
+      "type": "registry:block",
+      "files": [
+        {
+          "type": "registry:page"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "directions",
+      "type": "registry:block",
+      "files": [
+        {
+          "type": "registry:page"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "flow-map",
+      "type": "registry:block",
+      "files": [
+        {
+          "type": "registry:page"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "elevation-explorer",
+      "type": "registry:block",
+      "files": [
+        {
+          "type": "registry:page"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "delivery-tracker",
+      "type": "registry:block",
+      "files": [
+        {
+          "type": "registry:page"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "census-choropleth",
+      "type": "registry:block",
+      "files": [
+        {
+          "type": "registry:page"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "land-treaty-inspector",
+      "type": "registry:block",
+      "files": [
+        {
+          "type": "registry:page"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "address-playground",
+      "type": "registry:block",
+      "files": [
+        {
+          "type": "registry:page"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "energy-explorer",
+      "type": "registry:block",
+      "files": [
+        {
+          "type": "registry:page"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "energy-layer-control",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "energy-map",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "well-search",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "legal-land-search",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "energy-popup",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "treaty-context",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
+}

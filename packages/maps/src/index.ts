@@ -1,0 +1,153 @@
+import {
+  Map as MaplibreMap,
+  NavigationControl,
+  type ControlPosition,
+  type MapOptions,
+} from "maplibre-gl";
+import { unmapStyle, type MapProfile } from "./style";
+
+export * from "./style";
+/**
+ * The MapLibre GL library itself, re-exported so that reaching for `Marker` or `Popup` never
+ * means a second copy of MapLibre in the bundle.
+ *
+ * v6 is ESM-only and dropped the default export, so this is the module namespace rather than a
+ * default import. `import { maplibregl } from "@unmap/maps"` is unchanged for callers.
+ */
+export * as maplibregl from "maplibre-gl";
+export type { Map } from "maplibre-gl";
+
+/** Map projection. Mercator is the default; `globe` draws the map as a sphere. */
+export type Projection = "globe" | "mercator";
+
+export interface UnmapMapOptions {
+  key: string;
+  container: string | HTMLElement;
+  gateway?: string;
+  /** Style name (`base`, `muted`, `outdoor`), full style URL, or MapLibre style; defaults to `base`. */
+  style?: string;
+  /** "light" or "dark", light by default. Applies to a bare style name; a `<style>-<mode>` string is passed through as written and `mode` does not change it. */
+  mode?: string;
+  /** Label language, e.g. "fr". Omit to follow the request's Accept-Language. */
+  lang?: string;
+  /** Compact `ut1.` theme code from unmap.dev/create. Wins over the path style on the gateway. */
+  theme?: string;
+  /** Catalog layer ids composed onto the style (`municipalities`, `survey.dls`, …). */
+  overlays?: readonly string[];
+  /** Composition preset. Not a style. Explicit overlays replace the profile list. */
+  profile?: MapProfile;
+  /**
+   * `"globe"` draws the map as a sphere. Omit, or pass `"mercator"`, for the flat map.
+   * A city centre without a zoom still frames the city, not the planet.
+   */
+  projection?: Projection;
+  center?: [number, number];
+  zoom?: number;
+  /**
+   * On-map controls. `true` (the default) adds MapLibre's navigation control — zoom in, zoom
+   * out, and a compass — at `top-right`. `false` adds nothing.
+   *
+   * Shaped after MapLibre's own `attributionControl: false | {...}` so the two read alike. When
+   * further controls are offered they get their own keys here rather than overloading a boolean.
+   */
+  controls?: boolean | UnmapControlsOptions;
+  /** Extra MapLibre GL Map options, merged last. */
+  maplibre?: Partial<MapOptions>;
+}
+
+export interface UnmapControlsOptions {
+  /** Corner to mount the controls in. Defaults to `top-right`. */
+  position?: ControlPosition;
+}
+
+/** Where controls land when the caller does not say. MapLibre's own default corner. */
+const DEFAULT_CONTROL_POSITION: ControlPosition = "top-right";
+
+/**
+ * Start the compact attribution collapsed.
+ *
+ * `attributionControl: { compact: true }` is necessary but not sufficient, which is easy to miss.
+ * MapLibre's `_updateCompact` adds BOTH `maplibregl-compact` and `maplibregl-compact-show`, and
+ * the CSS reads:
+ *
+ *   .maplibregl-compact      .maplibregl-ctrl-attrib-inner { display: none }
+ *   .maplibregl-compact-show .maplibregl-ctrl-attrib-inner { display: block }
+ *
+ * so the pill is built but rendered *expanded*, and only collapses once the user drags the map.
+ * Dropping `compact-show` is what actually yields the ⓘ affordance on first paint.
+ *
+ * Doing it via `addControl(new AttributionControl({ compact: true }))` instead changes nothing —
+ * that path runs the same `_updateCompact`. The class is the lever, not the construction site.
+ *
+ * This is stable across resizes: `_updateCompact` re-adds `compact-show` only when the element
+ * does not already carry `maplibregl-compact`, and it still does. Clicking the ⓘ still toggles.
+ */
+function collapseAttribution(map: MaplibreMap): void {
+  const apply = () => {
+    const el = map
+      .getContainer()
+      .querySelector(".maplibregl-ctrl-attrib.maplibregl-compact-show");
+    el?.classList.remove("maplibregl-compact-show");
+  };
+  // Once now for the control added during construction, and once on load because a caller who
+  // passes their own attribution control may add it later.
+  apply();
+  map.once("load", apply);
+}
+
+/**
+ * MapLibre resolves a string `container` with `getElementById`, so `"#map"` throws
+ * "Container '#map' not found" even though it is the first thing a developer reaches for.
+ * Accept both: an id first, then any selector the string happens to be.
+ */
+function resolveContainer(container: string | HTMLElement): string | HTMLElement {
+  if (typeof container !== "string" || typeof document === "undefined") return container;
+  if (document.getElementById(container)) return container;
+  try {
+    return document.querySelector<HTMLElement>(container) ?? container;
+  } catch {
+    return container;
+  }
+}
+
+/** Create a MapLibre GL map wired to the unmap gateway (Mapbox-GL-JS-compatible surface). */
+export function createMap(opts: UnmapMapOptions): MaplibreMap {
+  const map = new MaplibreMap({
+    container: resolveContainer(opts.container),
+    style: unmapStyle(opts),
+    // Collapse attribution to the ⓘ affordance. MapLibre only auto-compacts under 640px, so on
+    // any narrower-than-full-width desktop map the full credit line runs across the bottom of
+    // the map, and on phones it wraps to two lines over the cartography. Attribution is not
+    // reduced by this — the same string stays one tap away, which is the standard treatment and
+    // what the OSM guidelines contemplate for small displays.
+    attributionControl: { compact: true },
+    ...(opts.center ? { center: opts.center } : {}),
+    // A centre without a zoom is a city, not the whole planet: MapLibre's default zoom is 0,
+    // which turns `new Unmap({ center: calgary })` into a world map. 11 frames a city.
+    ...(opts.zoom != null ? { zoom: opts.zoom } : opts.center ? { zoom: 11 } : {}),
+    // Spread last so a caller can override any default above, including the attribution.
+    ...opts.maplibre,
+  });
+  if (opts.projection) {
+    // MapLibre 6 has no constructor `projection` option, and calling `setProjection` before
+    // the style exists throws. `style.load` can fire during construction when the style is
+    // cached, so also apply on `load`, which is always after this function returns.
+    const type = opts.projection;
+    const apply = () => map.setProjection({ type });
+    map.once("style.load", apply);
+    map.once("load", apply);
+  }
+
+  // Skip only when the caller turned attribution off entirely; there is nothing to collapse.
+  if (opts.maplibre?.attributionControl !== false) collapseAttribution(map);
+
+  // Controls are added after construction because MapLibre offers no constructor option for
+  // them: `attributionControl` is the single exception, and every other control is an
+  // `addControl` call. Anything falsy but `undefined` means the caller opted out.
+  if (opts.controls !== false) {
+    const controls = typeof opts.controls === "object" ? opts.controls : {};
+    map.addControl(new NavigationControl(), controls.position ?? DEFAULT_CONTROL_POSITION);
+  }
+
+  return map;
+}
