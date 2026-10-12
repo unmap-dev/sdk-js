@@ -1,0 +1,42 @@
+{
+  "solving_mode": "DEFAULT_SOLVE",
+  "populate_polylines": true,
+  "max_validation_errors": 20,
+  "model": {
+    "global_start_time": "2026-10-12T08:00:00Z",
+    "global_end_time": "2026-10-12T18:00:00Z",
+    "shipments": [
+      {
+        "label": "snake_case_label",
+        "penalty_cost": 10,
+        "load_demands": { "cold_chain_crates": { "amount": "3" } },
+        "deliveries": [
+          {
+            "arrival_location": { "latitude": 46.8139, "longitude": -71.2080 },
+            "duration": "300s",
+            "time_windows": [
+              { "start_time": "2026-10-12T09:00:00Z", "end_time": "2026-10-12T12:00:00Z" }
+            ]
+          }
+        ]
+      }
+    ],
+    "vehicles": [
+      {
+        "start_location": { "latitude": 46.8000, "longitude": -71.2500 },
+        "load_limits": { "cold_chain_crates": { "max_load": "10" } },
+        "cost_per_kilometer": 1.2,
+        "route_duration_limit": { "max_duration": "36000s" },
+        "break_rule": {
+          "break_requests": [
+            {
+              "earliest_start_time": "2026-10-12T12:00:00Z",
+              "latest_start_time": "2026-10-12T13:00:00Z",
+              "min_duration": "900s"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

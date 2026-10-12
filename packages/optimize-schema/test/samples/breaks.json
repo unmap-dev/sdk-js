@@ -1,0 +1,37 @@
+{
+  "model": {
+    "globalStartTime": "2026-10-12T08:00:00Z",
+    "globalEndTime": "2026-10-12T18:00:00Z",
+    "shipments": [
+      {
+        "deliveries": [
+          { "arrivalLocation": { "latitude": 43.6532, "longitude": -79.3832 }, "duration": "1800s" }
+        ]
+      },
+      {
+        "deliveries": [
+          { "arrivalLocation": { "latitude": 43.7001, "longitude": -79.4163 }, "duration": "1800s" }
+        ]
+      }
+    ],
+    "vehicles": [
+      {
+        "startLocation": { "latitude": 43.6426, "longitude": -79.3871 },
+        "endLocation": { "latitude": 43.6426, "longitude": -79.3871 },
+        "costPerHour": 40,
+        "routeDurationLimit": { "maxDuration": "28800s" },
+        "travelDurationLimit": { "maxDuration": "14400s" },
+        "routeDistanceLimit": { "maxMeters": "250000" },
+        "breakRule": {
+          "breakRequests": [
+            {
+              "earliestStartTime": "2026-10-12T11:30:00Z",
+              "latestStartTime": "2026-10-12T13:00:00Z",
+              "minDuration": "1800s"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

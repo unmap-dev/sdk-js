@@ -66,7 +66,7 @@ Either CLI places the files through your aliases, rewrites imports, asks before 
 installs dependencies. Not on shadcn-vue? `@unmap/vue` and `@unmap/nuxt` provide the map, geocoder
 and routing as composables for any UI.
 
-Items: `map`, `geocoder`, `routing-panel`, `route-line`, `geojson-layer`, `cluster-layer`,
+Items: `map`, `geocoder`, `routing-panel`, `route-line`, `route-steps`, `geojson-layer`, `cluster-layer`,
 `heatmap-layer`, `arc-layer`, `flow-layer`, `marker-popup`, `map-controls`, `map-themes`,
 `map-context`, `map-layers`, `layer-legend`, `measure`, `feature-inspector`, `time-slider`,
 `draw`, `compare-swipe`, `elevation-profile`, `store-locator`, `directions`, `flow-map`,

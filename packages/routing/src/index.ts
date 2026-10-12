@@ -1,4 +1,7 @@
 import { DEFAULT_GATEWAY, UnmapError, fetchWithRetry, parseRetryAfter, type RetryPolicy } from "@unmap/core";
+import { optimizeTours, type OptimizeToursRequest, type OptimizeToursResult } from "./optimize-tours";
+
+export * from "./optimize-tours";
 
 export interface RouterOptions {
   key: string;
@@ -159,6 +162,22 @@ export interface RoadRouteOptions extends SharedRouteOptions {
 /** Transit options are a separate branch so `departAt` cannot be omitted by accident. */
 export type RouteOptions = RoadRouteOptions | TransitRouteOptions;
 
+/** Turn-by-turn options, taken by `route()`, `match()` and `optimize()`. */
+export interface StepOptions {
+  /**
+   * Return `steps`: written turn-by-turn directions for display. Off by default, so a route you
+   * only draw stays small.
+   */
+  steps?: boolean;
+  /**
+   * Language of each step's `instruction`: `en` or `fr`. A regional tag resolves by its language
+   * (`fr-CA` is French) and any other language is English. Only with `steps: true`; the gateway
+   * rejects it otherwise. Without it the gateway reads the request's `Accept-Language` header,
+   * which a browser sends for you.
+   */
+  lang?: string;
+}
+
 /** `TruckProfile` field → the gateway's snake_case query parameter. */
 const TRUCK_PARAMS: Record<keyof TruckProfile, string> = {
   height: "height",
@@ -199,8 +218,10 @@ function truckBody(truck?: TruckProfile): Record<string, number | boolean> {
  * call site and is then dropped on the floor, so the caller asks for something and silently does
  * not get it.
  */
-function bodyOptions(opts: RouteOptions): Record<string, unknown> {
+function bodyOptions(opts: RouteOptions & StepOptions): Record<string, unknown> {
   return {
+    ...(opts.steps != null ? { steps: opts.steps } : {}),
+    ...(opts.lang != null ? { lang: opts.lang } : {}),
     ...(opts.mode ? { mode: opts.mode } : {}),
     ...(opts.departAt != null ? { depart_at: departureValue(opts.departAt) } : {}),
     ...(opts.avoid?.length ? { avoid: opts.avoid } : {}),
@@ -485,6 +506,11 @@ export interface RouteResult {
   scheduleType?: "scheduled" | "realtime";
   /** Walking access/egress and transit rides, in travel order. Present only for transit routes. */
   legs?: RouteLeg[];
+  /**
+   * Turn-by-turn directions, in travel order. Present only when you pass `steps: true`. On a
+   * transit route they include the walk to and from each stop as well as the rides.
+   */
+  steps?: RouteStep[];
 }
 
 export interface TransitAgencySummary {
@@ -530,6 +556,107 @@ export interface TransitRouteLeg {
 }
 
 export type RouteLeg = PedestrianRouteLeg | TransitRouteLeg;
+
+/**
+ * What a step asks the traveller to do. unmap's own names, so your code does not depend on the
+ * routing engine's internal numbering. Switch on this to choose an icon; show `instruction` as text.
+ *
+ * - `depart` / `arrive`: the first step of a route, and every stop it reaches (`/optimized-route`
+ *   arrives at each stop and departs again).
+ * - `turn`, `uturn`, `continue`, `keep` (stay on a side at a split), `merge`, `name_change` (the
+ *   road you are on changes name).
+ * - `ramp` (take a ramp) and `exit` (leave by an exit), both on limited-access roads.
+ * - `roundabout` (enter; `roundaboutExit` says which exit) and `roundabout_exit`.
+ * - `ferry` (board) and `ferry_exit`.
+ * - Transit: `transit` (board), `transit_transfer`, `transit_stay_on`, `station_enter`,
+ *   `station_transfer`, `station_exit`.
+ * - Inside buildings on a walk: `elevator`, `stairs`, `escalator`, `building_enter`, `building_exit`.
+ * - `other`: a step the engine produced that unmap does not name yet. Show its instruction.
+ */
+export type RouteStepType =
+  | "depart"
+  | "arrive"
+  | "turn"
+  | "uturn"
+  | "continue"
+  | "keep"
+  | "merge"
+  | "name_change"
+  | "ramp"
+  | "exit"
+  | "roundabout"
+  | "roundabout_exit"
+  | "ferry"
+  | "ferry_exit"
+  | "transit"
+  | "transit_transfer"
+  | "transit_stay_on"
+  | "station_enter"
+  | "station_transfer"
+  | "station_exit"
+  | "elevator"
+  | "stairs"
+  | "escalator"
+  | "building_enter"
+  | "building_exit"
+  | "other";
+
+/**
+ * Which way a step goes. Absent when the step has no direction (a roundabout, a transfer). On
+ * `depart` and `arrive` it is the side of the road (`left`/`right`); on `uturn` the direction of
+ * the turn.
+ */
+export type RouteStepModifier =
+  | "sharp_left"
+  | "left"
+  | "slight_left"
+  | "straight"
+  | "slight_right"
+  | "right"
+  | "sharp_right";
+
+/** The guide sign at a highway junction, as posted. Every list is absent when the sign has none. */
+export interface RouteStepSign {
+  /** Exit numbers, e.g. `["91B"]`. */
+  exitNumbers?: string[];
+  /** The road or route the exit leads onto, e.g. `["Highway 2 North"]`. */
+  branches?: string[];
+  /** Where the exit goes, e.g. `["Red Deer"]`. */
+  toward?: string[];
+  /** The interchange's own name. Rare in Canada. */
+  names?: string[];
+}
+
+/**
+ * One turn-by-turn step: written directions, for display. There is no voice narration.
+ *
+ * Present on a route only when you ask for `steps`. Steps cover the whole route in travel order, so
+ * their distances and durations add up to the route's, give or take rounding.
+ */
+export interface RouteStep {
+  type: RouteStepType;
+  modifier?: RouteStepModifier;
+  /**
+   * The step as a sentence, e.g. "Turn left onto 17 Avenue Southwest.", in the language you asked
+   * for (`en` or `fr`). French is written by the engine's France French locale, not a Canadian
+   * one, so a few phrasings read as European French.
+   */
+  instruction: string;
+  /** Names of the road the step travels along. Absent on an unnamed road. */
+  streetNames?: string[];
+  distanceMeters: number;
+  durationSeconds: number;
+  /** Where the step begins, `[lng, lat]`. The same point as `geometry.coordinates[geometryRange[0]]`. */
+  location: LngLat;
+  /**
+   * First and last index of this step's stretch in the route's `geometry.coordinates`, inclusive.
+   * `coordinates.slice(start, end + 1)` is the line to highlight for the step.
+   */
+  geometryRange: [number, number];
+  /** On `type: "roundabout"`, which exit to take, counting from where you enter. */
+  roundaboutExit?: number;
+  sign?: RouteStepSign;
+}
 
 /**
  * Travel times and distances between every origin and every destination.
@@ -636,7 +763,7 @@ export class Router {
     this.fetchImpl = opts.fetch ?? globalThis.fetch.bind(globalThis);
   }
 
-  route(from: LngLat, to: LngLat, opts: RouteOptions = {}): Promise<RouteResult> {
+  route(from: LngLat, to: LngLat, opts: RouteOptions & StepOptions = {}): Promise<RouteResult> {
     // A polygon cannot ride a query string, so an `avoidAreas` call switches verb. Not a
     // behaviour change the caller has to think about: same parameters, same response, and the
     // GET stays the default so a plain route keeps its cacheable URL.
@@ -653,6 +780,8 @@ export class Router {
         avoid: opts.avoid?.length ? opts.avoid.join(",") : undefined,
         use_highways: opts.useHighways != null ? String(opts.useHighways) : undefined,
         use_hills: opts.useHills != null ? String(opts.useHills) : undefined,
+        steps: opts.steps != null ? String(opts.steps) : undefined,
+        lang: opts.lang,
         ...truckParams(opts.truck),
       },
       opts.signal,
@@ -718,7 +847,7 @@ export class Router {
    * outside WGS84 rejects with a `RouterError` (400, `invalid_location`). A point outside Canada
    * rejects with a `RouterError` (422, `outside_coverage`) before the graph is searched.
    */
-  match(coordinates: LngLat[], opts: RoadRouteOptions = {}): Promise<RouteResult> {
+  match(coordinates: LngLat[], opts: RoadRouteOptions & StepOptions = {}): Promise<RouteResult> {
     return this.post<RouteResult>("/match", { coordinates, ...bodyOptions(opts) }, opts.signal);
   }
 
@@ -737,8 +866,18 @@ export class Router {
    * connects, or two are further apart than the engine's straight-line matrix limit. There is no
    * partial tour either way, because a tour needs every leg.
    */
-  optimize(stops: LngLat[], opts: RoadRouteOptions = {}): Promise<OptimizedRouteResult> {
+  optimize(stops: LngLat[], opts: RoadRouteOptions & StepOptions = {}): Promise<OptimizedRouteResult> {
     return this.post<OptimizedRouteResult>("/optimized-route", { stops, ...bodyOptions(opts) }, opts.signal);
+  }
+
+  /**
+   * Assign shipments to vehicles and order their visits: Google Route Optimization's
+   * `optimizeTours`, served by Unmap Optimize. See the standalone `optimizeTours()` for what it
+   * resolves with and throws. This is `/optimized-route`'s bigger sibling: that one orders stops
+   * for a single vehicle, this one plans a fleet.
+   */
+  optimizeTours(request: OptimizeToursRequest, opts: { signal?: AbortSignal } = {}): Promise<OptimizeToursResult> {
+    return optimizeTours(request, { key: this.key, gateway: this.base, fetch: this.fetchImpl, retry: this.retry, signal: opts.signal });
   }
 
   private async post<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {

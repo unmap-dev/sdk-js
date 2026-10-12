@@ -76,6 +76,18 @@
       ]
     },
     {
+      "name": "route-steps",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "geojson-layer",
       "type": "registry:ui",
       "files": [

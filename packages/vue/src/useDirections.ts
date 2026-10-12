@@ -7,10 +7,11 @@ import {
   type IsochroneOptions,
   type LngLat,
   type RouteOptions,
+  type StepOptions,
 } from "@unmap/sdk";
 
 export interface UseDirectionsReturn {
-  route: (from: LngLat, to: LngLat, opts?: RouteOptions) => Promise<RouteResult>;
+  route: (from: LngLat, to: LngLat, opts?: RouteOptions & StepOptions) => Promise<RouteResult>;
   isochrone: (near: LngLat, opts: IsochroneOptions) => Promise<FeatureCollection>;
   result: Ref<RouteResult | FeatureCollection | null>;
   loading: Ref<boolean>;

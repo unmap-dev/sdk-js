@@ -1,6 +1,6 @@
 {
   "name": "@unmap/next",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "Next.js App Router integration for unmap: a server-component-safe <Map> plus the @unmap/react hooks",
   "license": "MIT",
   "keywords": [

@@ -1,6 +1,6 @@
 {
   "name": "@unmap/cli",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "unmap command-line tool: verify a key and scaffold a project",
   "license": "MIT",
   "keywords": [

@@ -1,0 +1,26 @@
+{
+  "model": {
+    "globalStartTime": { "seconds": "1791792000" },
+    "globalEndTime": { "seconds": 1791835200, "nanos": 500000000 },
+    "shipments": [
+      {
+        "deliveries": [
+          {
+            "arrivalLocation": { "latitude": 62.4540, "longitude": -114.3718 },
+            "duration": "0.5s",
+            "timeWindows": [
+              { "startTime": "2026-10-12T05:00:00-04:00", "endTime": "2026-10-12T13:00:00.250Z" }
+            ]
+          }
+        ],
+        "loadDemands": { "boxes": { "amount": 3 } }
+      }
+    ],
+    "vehicles": [
+      {
+        "startLocation": { "latitude": 62.4540, "longitude": -114.3718 },
+        "loadLimits": { "boxes": { "maxLoad": "9007199254740991" } }
+      }
+    ]
+  }
+}

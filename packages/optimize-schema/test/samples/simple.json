@@ -1,0 +1,21 @@
+{
+  "model": {
+    "shipments": [
+      {
+        "deliveries": [
+          {
+            "arrivalLocation": { "latitude": 51.0447, "longitude": -114.0719 },
+            "duration": "300s"
+          }
+        ]
+      }
+    ],
+    "vehicles": [
+      {
+        "startLocation": { "latitude": 51.0486, "longitude": -114.0708 },
+        "endLocation": { "latitude": 51.0486, "longitude": -114.0708 },
+        "costPerKilometer": 1
+      }
+    ]
+  }
+}

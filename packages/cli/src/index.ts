@@ -73,6 +73,7 @@ export const REGISTRY_ITEMS = [
   "geocoder",
   "routing-panel",
   "route-line",
+  "route-steps",
   "geojson-layer",
   "cluster-layer",
   "heatmap-layer",

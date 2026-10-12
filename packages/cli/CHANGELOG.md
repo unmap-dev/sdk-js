@@ -1,5 +1,13 @@
 # @unmap/cli
 
+## 0.21.0
+
+### Patch Changes
+
+- 9cb5773: `unmap add route-steps` installs the new turn-by-turn steps list.
+  - @unmap/core@0.21.0
+  - @unmap/geocoding@0.21.0
+
 ## 0.20.0
 
 ### Patch Changes

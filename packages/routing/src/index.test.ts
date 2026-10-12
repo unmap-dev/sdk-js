@@ -510,3 +510,59 @@ describe("Router.status", () => {
     expect(out.graph?.osmTimestamp).toBe("2026-09-09T20:21:13.000Z");
   });
 });
+
+describe("turn-by-turn steps", () => {
+  const ROUTE = { distanceMeters: 1, durationSeconds: 1, geometry: { type: "LineString", coordinates: [] } };
+  const bodyOf = (f: unknown) =>
+    JSON.parse((f as { mock: { calls: [string, { body: string }][] } }).mock.calls[0]![1].body) as Record<string, unknown>;
+
+  it("asks route() for steps and a language on the query string", async () => {
+    const step = {
+      type: "turn",
+      modifier: "left",
+      instruction: "Tournez à gauche sur la 17e Avenue SO.",
+      distanceMeters: 800,
+      durationSeconds: 60,
+      location: [-114.07, 51.04],
+      geometryRange: [3, 9],
+    };
+    const f = mockFetch({ ...ROUTE, steps: [step] });
+    const out = await new Router({ key: "k", fetch: f }).route([-114, 51], [-113.9, 51.1], { steps: true, lang: "fr" });
+    expect(urlOf(f)).toContain("steps=true");
+    expect(urlOf(f)).toContain("lang=fr");
+    expect(out.steps?.[0]?.type).toBe("turn");
+  });
+
+  it("sends neither parameter when steps are not asked for", async () => {
+    const f = mockFetch(ROUTE);
+    await new Router({ key: "k", fetch: f }).route([-114, 51], [-113.9, 51.1]);
+    expect(urlOf(f)).not.toMatch(/[?&](steps|lang)=/);
+  });
+
+  it("carries steps and lang in the POST bodies of match, optimize, and an avoidAreas route", async () => {
+    const r = (f: typeof fetch) => new Router({ key: "k", fetch: f });
+    const matched = mockFetch(ROUTE);
+    await r(matched).match([[-114, 51], [-113.9, 51.1]], { steps: true, lang: "en" });
+    expect(bodyOf(matched)).toMatchObject({ steps: true, lang: "en" });
+
+    const tour = mockFetch({ ...ROUTE, order: [0, 1, 2] });
+    await r(tour).optimize([[-114, 51], [-113.9, 51.1], [-114, 51]], { steps: true });
+    expect(bodyOf(tour)).toMatchObject({ steps: true });
+    expect(bodyOf(tour)).not.toHaveProperty("lang");
+
+    const avoiding = mockFetch(ROUTE);
+    await r(avoiding).route([-114, 51], [-113.9, 51.1], {
+      steps: true,
+      avoidAreas: { type: "Polygon", coordinates: [[[-114, 51], [-113.99, 51], [-113.99, 51.01], [-114, 51]]] },
+    });
+    expect(bodyOf(avoiding)).toMatchObject({ steps: true });
+  });
+
+  it("does not offer steps on isochrone or matrix", () => {
+    const r = new Router({ key: "k", fetch: mockFetch({}) });
+    // @ts-expect-error an isochrone has no path to describe
+    void (() => r.isochrone([-114, 51], { minutes: [10], steps: true }));
+    // @ts-expect-error neither does a matrix
+    void (() => r.matrix([[-114, 51]], [[-113.9, 51.1]], { steps: true }));
+  });
+});

@@ -1,0 +1,39 @@
+{
+  "model": {
+    "shipments": [
+      {
+        "deliveries": [
+          { "arrivalLocation": { "latitude": 53.5461, "longitude": -113.4938 }, "duration": "240s" }
+        ],
+        "loadDemands": { "weight_kg": { "amount": "120" }, "pallets": { "amount": 2 } },
+        "allowedVehicleIndices": [0, 1]
+      },
+      {
+        "deliveries": [
+          { "arrivalLocation": { "latitude": 53.5232, "longitude": -113.5263 }, "duration": "240s" }
+        ],
+        "loadDemands": { "weight_kg": { "amount": "80" } },
+        "allowedVehicleIndices": [1]
+      },
+      {
+        "pickups": [
+          { "arrivalLocation": { "latitude": 53.5701, "longitude": -113.4220 }, "duration": "300s" }
+        ],
+        "loadDemands": { "pallets": { "amount": "1" } },
+        "penaltyCost": 75.5
+      }
+    ],
+    "vehicles": [
+      {
+        "startLocation": { "latitude": 53.5444, "longitude": -113.4909 },
+        "endLocation": { "latitude": 53.5444, "longitude": -113.4909 },
+        "loadLimits": { "weight_kg": { "maxLoad": "500" }, "pallets": { "maxLoad": 4 } }
+      },
+      {
+        "startLocation": { "latitude": 53.5444, "longitude": -113.4909 },
+        "loadLimits": { "weight_kg": { "maxLoad": "1000" } },
+        "fixedCost": 100
+      }
+    ]
+  }
+}

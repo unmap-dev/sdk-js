@@ -1,0 +1,50 @@
+{
+  "timeout": "10s",
+  "model": {
+    "globalStartTime": "2026-10-12T08:00:00Z",
+    "globalEndTime": "2026-10-12T20:00:00Z",
+    "shipments": [
+      {
+        "label": "order-1001",
+        "deliveries": [
+          {
+            "arrivalLocation": { "latitude": 45.5019, "longitude": -73.5674 },
+            "duration": "600s",
+            "timeWindows": [
+              { "startTime": "2026-10-12T09:00:00Z", "endTime": "2026-10-12T11:00:00Z" }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "order-1002",
+        "deliveries": [
+          {
+            "arrivalLocation": { "latitude": 45.5236, "longitude": -73.5817 },
+            "duration": "450s",
+            "timeWindows": [
+              { "endTime": "2026-10-12T10:30:00.5Z" },
+              { "startTime": "2026-10-12T13:00:00Z" }
+            ]
+          }
+        ]
+      }
+    ],
+    "vehicles": [
+      {
+        "label": "van-1",
+        "startLocation": { "latitude": 45.4972, "longitude": -73.6104 },
+        "endLocation": { "latitude": 45.4972, "longitude": -73.6104 },
+        "startTimeWindows": [
+          { "startTime": "2026-10-12T08:00:00Z", "endTime": "2026-10-12T09:00:00Z" }
+        ],
+        "endTimeWindows": [
+          { "endTime": "2026-10-12T18:00:00Z" }
+        ],
+        "costPerHour": 30,
+        "costPerTraveledHour": 10,
+        "costPerKilometer": 0.5
+      }
+    ]
+  }
+}

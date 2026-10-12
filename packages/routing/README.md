@@ -38,5 +38,57 @@ Transit requires `departAt` and works on `route()` and `isochrone()`; a transit 
 `outside_coverage`. Production routes the agencies `/coverage.json` lists as routing-ready. There is
 no `arriveBy`, transit matrix, or realtime claim.
 
+## Optimize tours
+
+`optimizeTours()` is Unmap Optimize (`POST /optimize`): it assigns shipments to vehicles and orders
+their visits under time windows, capacities, breaks and route limits. The request is Google Route
+Optimization's `OptimizeToursRequest`, camelCase or snake_case, and `response` is its
+`OptimizeToursResponse`, unchanged. It is not `router.optimize()`, which orders the stops of one
+vehicle.
+
+```ts
+import { optimizeTours, UnmapOptimizeError } from '@unmap/routing'
+
+try {
+  const { response, warnings, billableShipments } = await optimizeTours(
+    {
+      model: {
+        shipments: [{ deliveries: [{ arrivalLocation: { latitude: 51.05, longitude: -114.07 } }] }],
+        vehicles: [{ startLocation: { latitude: 51.04, longitude: -114.06 } }],
+      },
+    },
+    { key: 'um_live_...' },
+  )
+  response.routes          // one ShipmentRoute per vehicle that was used
+  response.skippedShipments
+} catch (e) {
+  if (e instanceof UnmapOptimizeError) console.error(e.googleStatus, e.details)
+}
+```
+
+The same call is `router.optimizeTours(request)` on a `Router`, and `unmap.router.optimizeTours(request)`
+from `@unmap/sdk`. The key is sent in the `X-API-Key` header, not in the URL.
+
+What Unmap knows beyond Google's response comes back beside it, never inside it:
+
+- `warnings`: the parsed `X-Unmap-Optimize-Warnings` header, an array of
+  `{ code, field?, path?, count?, message }` for fields Unmap accepts but cannot honour, road travel
+  the routing budget decided, and route polylines that could not be drawn. Empty when there are none.
+- `billableShipments`: the shipments this request billed (the `X-Unmap-Billable-Shipments` header).
+  `0` for `solvingMode: 'VALIDATE_ONLY'`, for a shipment re-solved within 24 hours, and when the
+  header is absent.
+- `timeoutClamped` and `clampedTimeoutSeconds`: whether your `timeout` was over the plan's cap, and
+  the seconds the solve ran with instead.
+
+A failure throws `UnmapOptimizeError`, which extends `UnmapError`. `status` is the HTTP status,
+`code` the gateway's string code (`bad_request`, `rate_limited`, `quota_exceeded`),
+`retryAfterSeconds` comes from `Retry-After`, `googleStatus` is Google's status name
+(`INVALID_ARGUMENT`, `FAILED_PRECONDITION`, `RESOURCE_EXHAUSTED`) and `details` is Google's
+`error.details`: a `google.rpc.BadRequest` lists each field violation, and a `PreconditionFailure`
+lists the mandatory shipments no vehicle can serve. Retries follow the `retry` option, on by default
+for `429`, `502`, `503` and transport failures. A failed request is never billed. Until Unmap
+Optimize is enabled on the gateway, every call is a `404` with `code: 'not_found'` and no
+`googleStatus`.
+
 Parameters, response shapes, and error bodies are documented at
 [unmap.dev/docs/apis/routing](https://unmap.dev/docs/apis/routing).

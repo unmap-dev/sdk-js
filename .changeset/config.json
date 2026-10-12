@@ -15,7 +15,8 @@
       "@unmap/nuxt",
       "@unmap/react",
       "@unmap/next",
-      "@unmap/cli"
+      "@unmap/cli",
+      "@unmap/optimize-schema"
     ]
   ],
   "linked": [],

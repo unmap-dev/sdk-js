@@ -1,6 +1,6 @@
 {
   "name": "@unmap/react",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "React hooks for the unmap platform: map, geocoder, directions",
   "license": "MIT",
   "keywords": [

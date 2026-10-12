@@ -1,6 +1,6 @@
 {
   "name": "@unmap/routing",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "Typed client for the unmap routing API (route + isochrone)",
   "license": "MIT",
   "keywords": [
@@ -46,6 +46,7 @@
     "@unmap/core": "workspace:*"
   },
   "devDependencies": {
+    "@unmap/optimize-schema": "workspace:*",
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"

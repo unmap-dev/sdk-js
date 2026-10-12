@@ -1,5 +1,16 @@
 # @unmap/routing
 
+## 0.21.0
+
+### Minor Changes
+
+- 0870187: Add `optimizeTours()` to `@unmap/routing` and `@unmap/sdk`, a typed client for Unmap Optimize (`POST /optimize`), which takes Google Route Optimization's `OptimizeToursRequest` and returns its `OptimizeToursResponse` unchanged. It resolves with `{ response, warnings, billableShipments, timeoutClamped, clampedTimeoutSeconds }`, so the Unmap findings from the response headers sit beside the Google response and never inside it. The key travels in the `X-API-Key` header, not the URL. A failure throws `UnmapOptimizeError`, an `UnmapError` that also carries Google's `googleStatus` and `details` (the field violations of a `google.rpc.BadRequest`). `Router#optimizeTours()` is the same call on an existing client, so `new Unmap({ key }).router.optimizeTours(request)` works.
+- fd1f387: Turn-by-turn steps. `route()`, `match()` and `optimize()` take `steps: true` and return `steps`: written directions for display (no voice), each with an unmap-named `type` and `modifier`, the `instruction` text, street names, distance, duration, its start `location`, and `geometryRange` into the route line. `lang: "fr"` writes them in French; without it the gateway follows `Accept-Language`.
+
+### Patch Changes
+
+- @unmap/core@0.21.0
+
 ## 0.20.0
 
 ### Patch Changes

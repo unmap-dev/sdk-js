@@ -8,7 +8,7 @@ vi.mock("@unmap/maps", () => ({
   maplibregl: {},
 }));
 
-import { Unmap, Geocoder, Router, Transit } from "./index";
+import { Unmap, Geocoder, Router, Transit, optimizeTours, UnmapOptimizeError } from "./index";
 import type { CoverageDocument, CoverageSource } from "./coverage";
 
 describe("Unmap", () => {
@@ -18,6 +18,17 @@ describe("Unmap", () => {
     expect(u.router).toBeInstanceOf(Router);
     expect(u.transit).toBeInstanceOf(Transit);
     expect(u.map).toBeUndefined();
+  });
+
+  it("exposes optimizeTours on the router and as an export, with its error type", async () => {
+    const fetchStub = vi.fn(async () => ({ ok: true, status: 200, headers: new Headers({ "X-Unmap-Billable-Shipments": "2" }), json: async () => ({ routes: [] }) })) as unknown as typeof fetch;
+    const u = new Unmap({ key: "um_test_x", fetch: fetchStub });
+    const viaRouter = await u.router.optimizeTours({ model: {} });
+    expect(viaRouter.billableShipments).toBe(2);
+    const direct = await optimizeTours({ model: {} }, { key: "um_test_x", fetch: fetchStub });
+    expect(direct.response).toEqual({ routes: [] });
+    expect(new UnmapOptimizeError(400, "x")).toBeInstanceOf(Error);
+    expect((fetchStub as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls[0]![0]).toBe("https://api.unmap.dev/optimize");
   });
 
   it("creates a map when a container is given", () => {

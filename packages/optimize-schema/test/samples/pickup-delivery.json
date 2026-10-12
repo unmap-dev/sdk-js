@@ -1,0 +1,55 @@
+{
+  "label": "courier-run",
+  "model": {
+    "globalStartTime": "2026-10-12T07:00:00Z",
+    "globalEndTime": "2026-10-12T19:00:00Z",
+    "shipments": [
+      {
+        "label": "parcel-a",
+        "displayName": "Parcel A",
+        "penaltyCost": 250,
+        "pickups": [
+          {
+            "label": "warehouse",
+            "arrivalLocation": { "latitude": 49.2827, "longitude": -123.1207 },
+            "duration": "120s"
+          }
+        ],
+        "deliveries": [
+          {
+            "label": "customer",
+            "arrivalLocation": { "latitude": 49.2606, "longitude": -123.2460 },
+            "duration": "180s",
+            "timeWindows": [
+              { "startTime": "2026-10-12T10:00:00Z", "endTime": "2026-10-12T12:00:00Z" }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "parcel-b",
+        "pickups": [
+          {
+            "arrivalLocation": { "latitude": 49.2488, "longitude": -123.0016 },
+            "duration": "60s"
+          }
+        ],
+        "deliveries": [
+          {
+            "arrivalLocation": { "latitude": 49.3200, "longitude": -123.0724 },
+            "duration": "60s"
+          }
+        ]
+      }
+    ],
+    "vehicles": [
+      {
+        "displayName": "Bike courier",
+        "startLocation": { "latitude": 49.2827, "longitude": -123.1207 },
+        "fixedCost": 20,
+        "costPerHour": 25,
+        "travelMode": "DRIVING"
+      }
+    ]
+  }
+}

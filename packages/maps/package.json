@@ -1,6 +1,6 @@
 {
   "name": "@unmap/maps",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "unmap MapLibre GL renderer, wired to the unmap gateway",
   "license": "MIT",
   "keywords": [

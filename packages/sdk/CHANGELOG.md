@@ -1,5 +1,22 @@
 # @unmap/sdk
 
+## 0.21.0
+
+### Minor Changes
+
+- 0870187: Add `optimizeTours()` to `@unmap/routing` and `@unmap/sdk`, a typed client for Unmap Optimize (`POST /optimize`), which takes Google Route Optimization's `OptimizeToursRequest` and returns its `OptimizeToursResponse` unchanged. It resolves with `{ response, warnings, billableShipments, timeoutClamped, clampedTimeoutSeconds }`, so the Unmap findings from the response headers sit beside the Google response and never inside it. The key travels in the `X-API-Key` header, not the URL. A failure throws `UnmapOptimizeError`, an `UnmapError` that also carries Google's `googleStatus` and `details` (the field violations of a `google.rpc.BadRequest`). `Router#optimizeTours()` is the same call on an existing client, so `new Unmap({ key }).router.optimizeTours(request)` works.
+
+### Patch Changes
+
+- 1769bd2: Point source and issue links for all SDK packages at the public sdk-js repository.
+- Updated dependencies [0870187]
+- Updated dependencies [fd1f387]
+  - @unmap/routing@0.21.0
+  - @unmap/core@0.21.0
+  - @unmap/maps@0.21.0
+  - @unmap/geocoding@0.21.0
+  - @unmap/elevation@0.21.0
+
 ## 0.20.0
 
 ### Minor Changes

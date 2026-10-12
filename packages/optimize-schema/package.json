@@ -1,0 +1,43 @@
+{
+  "name": "@unmap/optimize-schema",
+  "private": true,
+  "version": "0.21.0",
+  "description": "Unmap Optimize request contract: GMPRO-compatible types, protobuf-JSON helpers, the field-status table, the request validator and a JSON Schema emitter",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./optimize-tours-request.schema.json": "./dist/optimize-tours-request.schema.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup && node scripts/emit-json-schema.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "gen-spec": "tsup && node scripts/gen-spec.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ajv": "^8.20.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unmap-dev/sdk-js.git",
+    "directory": "packages/optimize-schema"
+  },
+  "bugs": {
+    "url": "https://github.com/unmap-dev/sdk-js/issues"
+  }
+}

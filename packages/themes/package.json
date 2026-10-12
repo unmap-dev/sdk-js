@@ -1,6 +1,6 @@
 {
   "name": "@unmap/themes",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "unmap theme documents: types, recipes, validation, codec (data-only map themes)",
   "license": "MIT",
   "keywords": [

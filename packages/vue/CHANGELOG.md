@@ -1,5 +1,13 @@
 # @unmap/vue
 
+## 0.21.0
+
+### Patch Changes
+
+- Updated dependencies [0870187]
+- Updated dependencies [1769bd2]
+  - @unmap/sdk@0.21.0
+
 ## 0.20.0
 
 ### Patch Changes

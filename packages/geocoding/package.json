@@ -1,6 +1,6 @@
 {
   "name": "@unmap/geocoding",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "Typed client for the unmap geocoding API",
   "license": "MIT",
   "keywords": [

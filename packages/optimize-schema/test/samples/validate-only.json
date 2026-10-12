@@ -1,0 +1,26 @@
+{
+  "solvingMode": "VALIDATE_ONLY",
+  "timeout": "2.5s",
+  "label": "dry-run",
+  "maxValidationErrors": 50,
+  "useGeodesicDistances": true,
+  "geodesicMetersPerSecond": 8.3,
+  "model": {
+    "shipments": [
+      {
+        "deliveries": [
+          {
+            "arrivalWaypoint": { "location": { "latLng": { "latitude": 48.4284, "longitude": -123.3656 } } },
+            "duration": "120s"
+          }
+        ]
+      }
+    ],
+    "vehicles": [
+      {
+        "startWaypoint": { "location": { "latLng": { "latitude": 48.4300, "longitude": -123.3700 } } },
+        "unmapProfile": "auto"
+      }
+    ]
+  }
+}

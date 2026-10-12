@@ -74,15 +74,15 @@ A `File` goes as multipart, a plain object as GeoJSON, raw bytes as PMTiles.
 The same SDK loads from a script tag, with MapLibre already inside it:
 
 ```html
-<link rel="stylesheet" href="https://cdn.unmap.dev/sdk/0.20.0/unmap.css">
+<link rel="stylesheet" href="https://cdn.unmap.dev/sdk/0.21.0/unmap.css">
 <div id="map" style="height: 400px"></div>
-<script src="https://cdn.unmap.dev/sdk/0.20.0/unmap.js"></script>
+<script src="https://cdn.unmap.dev/sdk/0.21.0/unmap.js"></script>
 <script>
   unmap.createMap({ key: 'um_live_...', container: '#map', center: [-114.07, 51.05] })
 </script>
 ```
 
-Everything above is on the `unmap` global: `unmap.Unmap`, `unmap.Geocoder`, `unmap.Router`, `unmap.maplibregl`. Pin the exact version in production; `/sdk/0.20/` follows patches and `/sdk/latest/` follows everything.
+Everything above is on the `unmap` global: `unmap.Unmap`, `unmap.Geocoder`, `unmap.Router`, `unmap.maplibregl`. Pin the exact version in production; `/sdk/0.21/` follows patches and `/sdk/latest/` follows everything.
 
 ## Options
 
