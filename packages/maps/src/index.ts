@@ -81,18 +81,29 @@ const DEFAULT_CONTROL_POSITION: ControlPosition = "top-right";
  *
  * This is stable across resizes: `_updateCompact` re-adds `compact-show` only when the element
  * does not already carry `maplibregl-compact`, and it still does. Clicking the ⓘ still toggles.
+ *
+ * When it happens matters. At construction the control has no text yet, so MapLibre marks it
+ * `maplibregl-attrib-empty` and does not compact it; the first `styledata` or `sourcedata` that
+ * brings a credit adds both classes, and the credit then shows in full until something removes
+ * `compact-show`. Waiting for `load` left it open over a third of a phone map for as long as the
+ * tiles took. So collapse on the first data event that compacts it (MapLibre's own listener runs
+ * first, being registered in the constructor), then stop listening, so a reader who opens it
+ * keeps it open. A caller who adds their own attribution control later is covered the same way.
  */
 function collapseAttribution(map: MaplibreMap): void {
-  const apply = () => {
-    const el = map
-      .getContainer()
-      .querySelector(".maplibregl-ctrl-attrib.maplibregl-compact-show");
+  const collapse = (): boolean => {
+    const el = map.getContainer().querySelector(".maplibregl-ctrl-attrib.maplibregl-compact");
     el?.classList.remove("maplibregl-compact-show");
+    return !!el;
   };
-  // Once now for the control added during construction, and once on load because a caller who
-  // passes their own attribution control may add it later.
-  apply();
-  map.once("load", apply);
+  if (collapse()) return;
+  const onData = () => {
+    if (!collapse()) return;
+    map.off("styledata", onData);
+    map.off("sourcedata", onData);
+  };
+  map.on("styledata", onData);
+  map.on("sourcedata", onData);
 }
 
 /**

@@ -29,6 +29,10 @@ function fakeAttrib(classes: string[]) {
 }
 
 let lastAttrib: ReturnType<typeof fakeAttrib>;
+/** The most recent map's `on` listeners, by event, so a test can fire `styledata` itself. */
+let listeners: Map<string, Set<() => void>>;
+/** What the next map's attribution looks like at construction; MapLibre's usual result by default. */
+let attribAtConstruction: string[] | null = null;
 /** Every `addControl` call of the most recent map, as [control, position] pairs. */
 let added: [unknown, string | undefined][];
 /** Every `setProjection` call of the most recent map. */
@@ -38,18 +42,24 @@ const NavigationControlMock = vi.fn(function (options?: Record<string, unknown>)
 });
 const MapMock = vi.fn(function (_options: Record<string, unknown>) {
   // What MapLibre's `_updateCompact` produces for `compact: true`: both classes, together.
-  lastAttrib = fakeAttrib([
+  lastAttrib = fakeAttrib(attribAtConstruction ?? [
     "maplibregl-ctrl-attrib",
     "maplibregl-compact",
     "maplibregl-compact-show",
   ]);
     added = [];
     projections = [];
+    listeners = new Map();
   return {
     getContainer: () => ({
       querySelector: (sel: string) => (lastAttrib.matches(sel) ? lastAttrib : null),
     }),
     once: (_e: string, cb: () => void) => cb(),
+    on: (e: string, cb: () => void) => {
+      if (!listeners.has(e)) listeners.set(e, new Set());
+      listeners.get(e)!.add(cb);
+    },
+    off: (e: string, cb: () => void) => listeners.get(e)?.delete(cb),
     addControl: (control: unknown, position?: string) => added.push([control, position]),
     setProjection: (projection: unknown) => projections.push(projection),
   };
@@ -115,6 +125,26 @@ describe("createMap", () => {
     createMap({ key: "k", container: "map" });
     expect(lastAttrib.classList.contains("maplibregl-compact")).toBe(true);
     expect(lastAttrib.classList.contains("maplibregl-compact-show")).toBe(false);
+  });
+
+  // The control has no text at construction, so MapLibre compacts it (and shows it) only when the
+  // first credit arrives. It must collapse then, not when every tile has loaded.
+  it("collapses the attribution when the first credit compacts it, then leaves it to the reader", () => {
+    attribAtConstruction = ["maplibregl-ctrl-attrib", "maplibregl-attrib-empty"];
+    try {
+      createMap({ key: "k", container: "map" });
+    } finally {
+      attribAtConstruction = null;
+    }
+    const fire = (e: string) => [...(listeners.get(e) ?? [])].forEach((cb) => cb());
+    fire("sourcedata");
+    expect(listeners.get("styledata")?.size).toBe(1);
+    // What MapLibre's `_updateAttributions` does when the style brings its first credit.
+    lastAttrib = Object.assign(lastAttrib, fakeAttrib(["maplibregl-ctrl-attrib", "maplibregl-compact", "maplibregl-compact-show"]));
+    fire("styledata");
+    expect(lastAttrib.classList.contains("maplibregl-compact-show")).toBe(false);
+    expect(listeners.get("styledata")?.size ?? 0).toBe(0);
+    expect(listeners.get("sourcedata")?.size ?? 0).toBe(0);
   });
 
   it("leaves the DOM alone when the caller turned attribution off", () => {
