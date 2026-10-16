@@ -72,7 +72,8 @@ Items: `map`, `geocoder`, `routing-panel`, `route-line`, `route-steps`, `geojson
 `draw`, `compare-swipe`, `elevation-profile`, `store-locator`, `directions`, `flow-map`,
 `elevation-explorer`, `delivery-tracker`, `census-choropleth`, `land-treaty-inspector`,
 `address-playground`, `energy-explorer`, `energy-map`, `energy-layer-control`, `well-search`,
-`legal-land-search`, `energy-popup`, `treaty-context`, `business-locator-01`, `local-guide-01`,
+`legal-land-search`, `energy-popup`, `treaty-context`, `api-calls`, `api-inspector`,
+`business-locator-01`, `local-guide-01`,
 `public-notices-01`, `map-story-01`, `map-markers-01`, `map-measure-01`, `map-inspect-01`,
 `map-timeline-01`, `map-draw-01`, `map-compare-01`, `map-elevation-01`, `map-geojson-01`,
 `map-clusters-01`, `map-heatmap-01`, `map-arcs-01`, `map-flows-01`.

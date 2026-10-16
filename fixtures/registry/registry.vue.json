@@ -479,6 +479,33 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "api-calls",
+      "type": "registry:lib",
+      "files": [
+        {
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "api-inspector",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

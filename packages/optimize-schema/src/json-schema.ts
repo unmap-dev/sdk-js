@@ -61,8 +61,12 @@ function single(row: FieldRow): JsonSchema {
           },
         ],
       };
-    case "enum":
-      return { type: "string", enum: (row.enumValues ?? []).filter((v) => v.status === "supported").map((v) => v.value) };
+    case "enum": {
+      const supported = (row.enumValues ?? []).filter((v) => v.status === "supported");
+      const names = { type: "string", enum: supported.map((v) => v.value) };
+      const numbers = supported.filter((v) => v.number !== undefined).map((v) => v.number);
+      return numbers.length === 0 ? names : { oneOf: [names, { type: "integer", enum: numbers }] };
+    }
   }
 }
 

@@ -52,3 +52,8 @@ describe("the emitted JSON Schema", () => {
     }
   });
 });
+
+it("describes proto enums as their names or their integers", () => {
+  const props = (buildJsonSchema() as any).properties;
+  expect(props.solvingMode.oneOf).toEqual([{ type: "string", enum: ["DEFAULT_SOLVE", "VALIDATE_ONLY"] }, { type: "integer", enum: [0, 1] }]);
+});

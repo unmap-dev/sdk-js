@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   checkStorageUri,
+  enumNameOf,
   FIELDS,
   MAX_HORIZON_SECONDS,
   MAX_LOAD_TYPES,
@@ -551,10 +552,11 @@ describe("GMPRO fidelity rules", () => {
     const vehicle = (extra: Record<string, unknown>) => ({ model: { vehicles: [extra] } });
     expect(errorFor(vehicle({ travelDurationMultiple: 0 })).map((e) => e[0])).toEqual(["FIELD_NOT_SUPPORTED_YET"]);
     expect(errorFor(vehicle({ travelDurationMultiple: 1 }))).toEqual([]);
-    expect(errorFor(vehicle({ routeDistanceLimit: { softMaxMeters: "0" } })).map((e) => e[1])).toEqual(["model.vehicles[0].routeDistanceLimit.softMaxMeters"]);
-    expect(errorFor(vehicle({ routeDistanceLimit: { softMaxMeters: 0 } })).map((e) => e[1])).toEqual(["model.vehicles[0].routeDistanceLimit.softMaxMeters"]);
-    expect(errorFor(vehicle({ routeDistanceLimit: { costPerKilometerBelowSoftMax: 0 } })).map((e) => e[1])).toEqual([
-      "model.vehicles[0].routeDistanceLimit.costPerKilometerBelowSoftMax",
+    // softMaxMeters is supported now; a zero soft maximum is a real value, so it validates and survives.
+    expect(errorFor(vehicle({ routeDistanceLimit: { softMaxMeters: "0" } }))).toEqual([]);
+    expect(validateRequest(vehicle({ routeDistanceLimit: { softMaxMeters: 0 } })).request?.model?.vehicles?.[0]?.routeDistanceLimit?.softMaxMeters).toBe(0);
+    expect(errorFor(vehicle({ routeDistanceLimit: { costPerKilometerBelowSoftMax: 0 } })).map((e) => [e[0], e[1]])).toEqual([
+      ["INVALID_VALUE", "model.vehicles[0].routeDistanceLimit.costPerKilometerBelowSoftMax"],
     ]);
   });
 
@@ -827,5 +829,225 @@ describe("integer bounds the solver can hold", () => {
     const limit = (maxMeters: string) => ({ model: { vehicles: [{ routeDistanceLimit: { maxMeters } }] } });
     expect(validateRequest(limit("1000000000")).errors).toEqual([]);
     expect(validateRequest(limit("1000000001")).errors.map((e) => [e.code, e.path])).toEqual([["OUT_OF_RANGE", "model.vehicles[0].routeDistanceLimit.maxMeters"]]);
+  });
+});
+
+describe("integer enums", () => {
+  const withMode = (fields: Record<string, unknown>) => ({ ...base(), ...fields });
+
+  it("accepts every proto enum as its integer and normalises it to the name", () => {
+    const r = validateRequest(withMode({ solvingMode: 1 }));
+    expect(r.errors).toEqual([]);
+    expect(r.request?.solvingMode).toBe("VALIDATE_ONLY");
+    const v = base();
+    ((v.model as any).vehicles[0] as Record<string, unknown>).travelMode = 1;
+    const rv = validateRequest(v);
+    expect(rv.errors).toEqual([]);
+    expect((rv.request as any).model.vehicles[0].travelMode).toBe("DRIVING");
+  });
+
+  it("applies the name's status to an integer", () => {
+    const v = base();
+    ((v.model as any).vehicles[0] as Record<string, unknown>).travelMode = 2;
+    const r = validateRequest(v);
+    expect(r.errors.map((e) => [e.code, e.path])).toEqual([["VALUE_NOT_SUPPORTED_YET", "model.vehicles[0].travelMode"]]);
+  });
+
+  it("refuses an integer the enum does not define, a negative one and a fraction", () => {
+    for (const bad of [9, -1, 1.5]) {
+      const r = validateRequest(withMode({ solvingMode: bad }));
+      expect(r.errors.map((e) => e.code)).toEqual(["INVALID_ENUM_VALUE"]);
+      expect(r.errors[0]!.errorMessage).toContain("or its integer value");
+    }
+  });
+
+  it("keeps refusing integers for unmapProfile, which is not a proto enum", () => {
+    const v = base();
+    ((v.model as any).vehicles[0] as Record<string, unknown>).unmapProfile = 0;
+    expect(validateRequest(v).errors.map((e) => e.code)).toEqual(["INVALID_ENUM_VALUE"]);
+  });
+
+  it("treats 0 as the default", () => {
+    expect(validateRequest(withMode({ solvingMode: 0 })).request?.solvingMode).toBe("DEFAULT_SOLVE");
+  });
+
+  it("supports both searchMode values, by name and by integer", () => {
+    for (const mode of ["RETURN_FAST", "CONSUME_ALL_AVAILABLE_TIME", 1, 2]) {
+      expect(validateRequest({ ...base(), searchMode: mode }).errors).toEqual([]);
+    }
+  });
+
+  it("pins every proto enum number, so a reordered values() call cannot shift them", () => {
+    const V = "model.vehicles[]";
+    const proto: [string, string[]][] = [
+      ["solvingMode", ["DEFAULT_SOLVE", "VALIDATE_ONLY", "DETECT_SOME_INFEASIBLE_SHIPMENTS", "TRANSFORM_AND_RETURN_REQUEST"]],
+      ["searchMode", ["SEARCH_MODE_UNSPECIFIED", "RETURN_FAST", "CONSUME_ALL_AVAILABLE_TIME"]],
+      [`${V}.travelMode`, ["TRAVEL_MODE_UNSPECIFIED", "DRIVING", "WALKING"]],
+      [`${V}.unloadingPolicy`, ["UNLOADING_POLICY_UNSPECIFIED", "LAST_IN_FIRST_OUT", "FIRST_IN_FIRST_OUT"]],
+    ];
+    for (const [path, names] of proto) {
+      names.forEach((name, number) => {
+        expect(enumNameOf(path, number), `${path} ${number}`).toBe(name);
+        expect(enumNameOf(path, name), `${path} ${name}`).toBe(name);
+      });
+      expect(enumNameOf(path, names.length)).toBeUndefined();
+    }
+  });
+});
+
+describe("soft constraints", () => {
+  const vehicleOf = (r: Record<string, unknown>) => (r.model as any).vehicles[0];
+  const pickupOf = (r: Record<string, unknown>) => (r.model as any).shipments[0].pickups[0];
+
+  it("accepts every soft field", () => {
+    const r = base();
+    Object.assign(pickupOf(r).timeWindows[0], {
+      softStartTime: "1970-01-01T01:10:00Z", costPerHourBeforeSoftStartTime: 5,
+      softEndTime: "1970-01-01T01:50:00Z", costPerHourAfterSoftEndTime: 5,
+    });
+    Object.assign(vehicleOf(r).endTimeWindows[0], { softEndTime: "1970-01-01T20:00:00Z", costPerHourAfterSoftEndTime: 1 });
+    Object.assign(vehicleOf(r).routeDurationLimit, { softMaxDuration: "18000s", costPerHourAfterSoftMax: 2 });
+    Object.assign(vehicleOf(r).travelDurationLimit, { softMaxDuration: "18000s", costPerHourAfterSoftMax: 2 });
+    Object.assign(vehicleOf(r).routeDistanceLimit, { softMaxMeters: "50000", costPerKilometerAboveSoftMax: 1 });
+    // Load type k is paired (pickup and delivery), so a soft max on it is refused; use a pickup-only type.
+    (r.model as any).shipments.push({ pickups: [{ arrivalLocation: { latitude: 51, longitude: -114 } }], loadDemands: { p: { amount: "1" } } });
+    vehicleOf(r).loadLimits.p = { softMaxLoad: "3", costPerUnitAboveSoftMax: 4 };
+    expect(validateRequest(r).errors).toEqual([]);
+  });
+
+  it("refuses soft bounds on a list of more than one window", () => {
+    const r = base();
+    pickupOf(r).timeWindows = [
+      { startTime: "1970-01-01T01:00:00Z", endTime: "1970-01-01T01:30:00Z", softEndTime: "1970-01-01T01:20:00Z", costPerHourAfterSoftEndTime: 1 },
+      { startTime: "1970-01-01T01:40:00Z", endTime: "1970-01-01T02:00:00Z" },
+    ];
+    expect(validateRequest(r).errors.map((e) => [e.code, e.path])).toEqual([["INVALID_TIME_WINDOW", "model.shipments[0].pickups[0].timeWindows[0]"]]);
+  });
+
+  it("refuses a soft end after the hard end and a soft start before the hard start", () => {
+    const r = base();
+    Object.assign(pickupOf(r).timeWindows[0], { softEndTime: "1970-01-01T02:30:00Z", costPerHourAfterSoftEndTime: 1 });
+    expect(validateRequest(r).errors.map((e) => e.code)).toEqual(["INVALID_TIME_WINDOW"]);
+    const s = base();
+    Object.assign(pickupOf(s).timeWindows[0], { softStartTime: "1970-01-01T00:30:00Z", costPerHourBeforeSoftStartTime: 1 });
+    expect(validateRequest(s).errors.map((e) => e.code)).toEqual(["INVALID_TIME_WINDOW"]);
+  });
+
+  it("accepts a soft start after the hard end and a soft end before the hard start: they always charge, as on GMPRO", () => {
+    const r = base();
+    Object.assign(pickupOf(r).timeWindows[0], { softStartTime: "1970-01-01T05:00:00Z", costPerHourBeforeSoftStartTime: 1 });
+    expect(validateRequest(r).errors).toEqual([]);
+    const s = base();
+    Object.assign(pickupOf(s).timeWindows[0], { softEndTime: "1970-01-01T00:30:00Z", costPerHourAfterSoftEndTime: 1 });
+    expect(validateRequest(s).errors).toEqual([]);
+    const v = base();
+    Object.assign(vehicleOf(v).startTimeWindows[0], { endTime: "1970-01-01T01:00:00Z", softStartTime: "1970-01-01T03:00:00Z", costPerHourBeforeSoftStartTime: 1 });
+    expect(validateRequest(v).errors).toEqual([]);
+  });
+
+  it("refuses a soft bound outside the global window, naming it", () => {
+    const late = base();
+    (late.model as any).globalEndTime = "1970-01-02T00:00:00Z";
+    Object.assign(pickupOf(late).timeWindows[0], { softStartTime: "1970-01-02T01:00:00Z", costPerHourBeforeSoftStartTime: 1 });
+    const errors = validateRequest(late).errors;
+    expect(errors.map((e) => [e.code, e.path])).toEqual([["INVALID_TIME_WINDOW", "model.shipments[0].pickups[0].timeWindows[0]"]]);
+    expect(errors[0]!.errorMessage).toMatch(/globalStartTime.*globalEndTime/);
+    const early = base();
+    (early.model as any).globalStartTime = "1970-01-01T00:10:00Z";
+    Object.assign(pickupOf(early).timeWindows[0], { softEndTime: "1970-01-01T00:05:00Z", costPerHourAfterSoftEndTime: 1 });
+    vehicleOf(early).startTimeWindows[0].startTime = "1970-01-01T00:10:00Z";
+    vehicleOf(early).breakRule.breakRequests = [];
+    expect(validateRequest(early).errors.map((e) => [e.code, e.path])).toEqual([["INVALID_TIME_WINDOW", "model.shipments[0].pickups[0].timeWindows[0]"]]);
+    const vehicle = base();
+    (vehicle.model as any).globalEndTime = "1970-01-02T00:00:00Z";
+    Object.assign(vehicleOf(vehicle).endTimeWindows[0], { softEndTime: "1970-01-02T00:00:01Z", costPerHourAfterSoftEndTime: 1 });
+    // A soft end after the global end is also after the hard end; either way it is refused once.
+    expect(validateRequest(vehicle).errors.map((e) => [e.code, e.path])).toEqual([["INVALID_TIME_WINDOW", "model.vehicles[0].endTimeWindows[0]"]]);
+  });
+
+  it("refuses a cost without its soft bound", () => {
+    const r = base();
+    Object.assign(pickupOf(r).timeWindows[0], { costPerHourAfterSoftEndTime: 1 });
+    expect(validateRequest(r).errors.map((e) => [e.code, e.path])).toEqual([["MISSING_REQUIRED_FIELD", "model.shipments[0].pickups[0].timeWindows[0].softEndTime"]]);
+  });
+
+  it("refuses a soft limit at or above the hard limit", () => {
+    const r = base();
+    Object.assign(vehicleOf(r).routeDurationLimit, { softMaxDuration: "36000s", costPerHourAfterSoftMax: 1 });
+    expect(validateRequest(r).errors.map((e) => e.code)).toEqual(["INVALID_VALUE"]);
+    const d = base();
+    Object.assign(vehicleOf(d).routeDistanceLimit, { softMaxMeters: "100000", costPerKilometerAboveSoftMax: 1 });
+    expect(validateRequest(d).errors.map((e) => [e.code, e.path])).toEqual([["INVALID_VALUE", "model.vehicles[0].routeDistanceLimit.softMaxMeters"]]);
+  });
+
+  it("refuses a soft cost without its soft limit", () => {
+    const r = base();
+    vehicleOf(r).routeDurationLimit.costPerHourAfterSoftMax = 1;
+    vehicleOf(r).routeDistanceLimit.costPerKilometerAboveSoftMax = 1;
+    expect(validateRequest(r).errors.map((e) => [e.code, e.path])).toEqual([
+      ["MISSING_REQUIRED_FIELD", "model.vehicles[0].routeDurationLimit.softMaxDuration"],
+      ["MISSING_REQUIRED_FIELD", "model.vehicles[0].routeDistanceLimit.softMaxMeters"],
+    ]);
+  });
+
+  /** base() plus a pickup-only shipment of load type p, so p is monotone and k stays paired. */
+  const withPickupOnly = (): Record<string, unknown> => {
+    const r = base();
+    (r.model as any).shipments.push({ pickups: [{ arrivalLocation: { latitude: 51, longitude: -114 } }], loadDemands: { p: { amount: "1" } } });
+    return r;
+  };
+
+  it("accepts costPerUnitAboveSoftMax alone: on GMPRO it is a soft max load of 0", () => {
+    const r = withPickupOnly();
+    vehicleOf(r).loadLimits.p = { costPerUnitAboveSoftMax: 5 };
+    expect(validateRequest(r).errors).toEqual([]);
+    for (const zero of [0, "0", "-0", "00"]) {
+      const z = withPickupOnly();
+      vehicleOf(z).loadLimits.p = { softMaxLoad: zero, costPerUnitAboveSoftMax: 5 };
+      expect(validateRequest(z).errors, String(zero)).toEqual([]);
+    }
+  });
+
+  it("refuses an active soft load limit (a cost above 0) on a paired load type, whatever its max", () => {
+    for (const limit of [{ costPerUnitAboveSoftMax: 1 }, { softMaxLoad: "0", costPerUnitAboveSoftMax: 1 }, { softMaxLoad: "-0", costPerUnitAboveSoftMax: 1 }]) {
+      const r = base();
+      Object.assign(vehicleOf(r).loadLimits.k, limit);
+      expect(validateRequest(r).errors.map((e) => [e.code, e.path]), JSON.stringify(limit)).toEqual([
+        ["INVALID_VALUE", 'model.vehicles[0].loadLimits["k"].softMaxLoad'],
+      ]);
+    }
+  });
+
+  it("accepts an inert softMaxLoad (no cost, or a cost of 0) on a paired load type", () => {
+    for (const limit of [{ softMaxLoad: "5" }, { softMaxLoad: "5", costPerUnitAboveSoftMax: 0 }, { softMaxLoad: "00" }]) {
+      const r = base();
+      Object.assign(vehicleOf(r).loadLimits.k, limit);
+      expect(validateRequest(r).errors, JSON.stringify(limit)).toEqual([]);
+    }
+  });
+
+  it("accepts an active soft load limit on a load type no shipment uses", () => {
+    const r = base();
+    vehicleOf(r).loadLimits.unused = { softMaxLoad: "2", costPerUnitAboveSoftMax: 3 };
+    expect(validateRequest(r).errors).toEqual([]);
+  });
+
+  it("refuses a soft max load on a load type that both pickups and deliveries use", () => {
+    const r = base();
+    vehicleOf(r).loadLimits.k.softMaxLoad = "5";
+    vehicleOf(r).loadLimits.k.costPerUnitAboveSoftMax = 1;
+    expect(validateRequest(r).errors.map((e) => [e.code, e.path])).toEqual([["INVALID_VALUE", 'model.vehicles[0].loadLimits["k"].softMaxLoad']]);
+  });
+
+  it("keeps quadratic soft durations refused as planned, and costPerKilometerBelowSoftMax rejected as GMPRO does", () => {
+    const r = base();
+    Object.assign(vehicleOf(r).routeDurationLimit, { quadraticSoftMaxDuration: "100s" });
+    expect(validateRequest(r).errors.map((e) => e.code)).toEqual(["FIELD_NOT_SUPPORTED_YET"]);
+    const d = base();
+    Object.assign(vehicleOf(d).routeDistanceLimit, { costPerKilometerBelowSoftMax: 1 });
+    const errors = validateRequest(d).errors;
+    expect(errors.map((e) => e.code)).toEqual(["INVALID_VALUE"]);
+    expect(errors[0]!.errorMessage).toMatch(/GMPRO does not support it/);
+    expect(errors[0]!.errorMessage).not.toMatch(/planned/);
   });
 });

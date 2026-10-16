@@ -106,6 +106,8 @@ export const REGISTRY_ITEMS = [
   "legal-land-search",
   "energy-popup",
   "treaty-context",
+  "api-calls",
+  "api-inspector",
   ...REACT_BLOCKS,
 ] as const;
 

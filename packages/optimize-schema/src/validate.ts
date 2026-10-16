@@ -8,7 +8,7 @@
  */
 
 import { fieldReferenceOf, type ValidationErrorCode, type ValidationIssue, type ValidationWarning } from "./errors";
-import { childrenOf, IGNORED_CODE, MAX_LOAD_TYPES, type FieldRow } from "./fields";
+import { childrenOf, enumNameOf, IGNORED_CODE, MAX_LOAD_TYPES, type FieldRow } from "./fields";
 import { joinPath, normalizeKeys, parseDuration, parseInt64, parseTimestamp, ProtoJsonError } from "./protojson";
 import type { OptimizeToursRequest } from "./types";
 
@@ -255,10 +255,13 @@ export function validateRequest(raw: unknown, opts: ValidateOptions = {}): Valid
       }
       case "enum": {
         const known = row.enumValues ?? [];
-        const match = typeof value === "string" ? known.find((v) => v.value === value) : undefined;
+        const name = enumNameOf(row.path, value);
+        const match = name === undefined ? undefined : known.find((v) => v.value === name);
         if (!match) {
-          return add("INVALID_ENUM_VALUE", path, `Expected one of ${known.map((v) => v.value).join(", ")}.`, { value });
+          const integers = known.some((v) => v.number !== undefined) ? " or its integer value" : "";
+          return add("INVALID_ENUM_VALUE", path, `Expected one of ${known.map((v) => v.value).join(", ")}${integers}.`, { value });
         }
+        if (typeof value === "number") set(match.value);
         if (match.status !== "supported") add("VALUE_NOT_SUPPORTED_YET", path, match.message ?? "", { value });
         return;
       }
@@ -306,6 +309,37 @@ function tryTimestamp(value: unknown): number | undefined {
   } catch {
     return undefined;
   }
+}
+
+function tryDuration(value: unknown): number | undefined {
+  if (!present(value)) return undefined;
+  try {
+    return parseDuration(value);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Load types some shipment demands that are not monotone: pickups and deliveries both use them. A
+ * type no shipment demands is not in the set, so a soft limit on it is allowed (it never charges).
+ * Only shipment-level loadDemands are read: visit-level ones are refused (planned for V2), and
+ * when they ship this must read them too, or a paired type demanded only on visits would pass.
+ */
+function pairedLoadTypes(model: Json): Set<string> {
+  const kinds = new Map<string, Set<"pickup" | "delivery" | "both">>();
+  for (const [shipment] of objects(model.shipments)) {
+    if (!isObject(shipment.loadDemands)) continue;
+    const p = list(shipment.pickups).length > 0;
+    const d = list(shipment.deliveries).length > 0;
+    const kind = p && d ? "both" : p ? "pickup" : "delivery";
+    for (const key of Object.keys(shipment.loadDemands)) {
+      if (isReservedMapKey(key)) continue;
+      if (!kinds.has(key)) kinds.set(key, new Set());
+      kinds.get(key)?.add(kind);
+    }
+  }
+  return new Set([...kinds].filter(([, k]) => k.size > 1 || k.has("both")).map(([key]) => key));
 }
 
 /** Refuses the first load type name past {@link MAX_LOAD_TYPES}, once. Reserved keys were refused by the walk. */
@@ -393,6 +427,26 @@ function crossFieldChecks(request: Json, add: Add): void {
         add("INVALID_TIME_WINDOW", at, "Time windows must be in increasing order and must not overlap or touch.");
       }
       previousEnd = Math.max(previousEnd, end);
+
+      const soft = (name: "softStartTime" | "softEndTime", cost: string): number | undefined => {
+        if (present(window[cost]) && !present(window[name])) add("MISSING_REQUIRED_FIELD", joinPath(at, name), `${cost} needs ${name}.`);
+        return present(window[name]) ? tryTimestamp(window[name]) : undefined;
+      };
+      const softStart = soft("softStartTime", "costPerHourBeforeSoftStartTime");
+      const softEnd = soft("softEndTime", "costPerHourAfterSoftEndTime");
+      // As on GMPRO, a soft bound may lie past the other side of its hard window (a soft start after
+      // endTime, a soft end before startTime): every event then pays it. It must stay inside the
+      // global window, which is what the solver's time axis covers.
+      const outside = (t: number | undefined): boolean => t !== undefined && (t < globalStart || t > globalEnd);
+      if ((present(window.softStartTime) || present(window.softEndTime)) && list(value).length > 1) {
+        add("INVALID_TIME_WINDOW", at, "Soft bounds need a single time window; this list has several.");
+      } else if (outside(softStart) || outside(softEnd)) {
+        add("INVALID_TIME_WINDOW", at, "softStartTime and softEndTime must lie inside model.globalStartTime to model.globalEndTime.");
+      } else if (softStart !== undefined && softStart < start) {
+        add("INVALID_TIME_WINDOW", at, "softStartTime must not be before startTime.");
+      } else if (softEnd !== undefined && softEnd > end) {
+        add("INVALID_TIME_WINDOW", at, "softEndTime must not be after endTime.");
+      }
     }
     return { opens, closes };
   };
@@ -500,6 +554,7 @@ function crossFieldChecks(request: Json, add: Add): void {
   }
 
   // Vehicles.
+  const paired = pairedLoadTypes(model);
   for (const [vehicle, i] of objects(model.vehicles)) {
     const at = `model.vehicles[${i}]`;
     const spans: Partial<Record<"start" | "end", { opens: number; closes: number }>> = {};
@@ -542,6 +597,37 @@ function crossFieldChecks(request: Json, add: Add): void {
           `${at}.startTags`,
           `A vehicle's startTags must match exactly one durationDistanceMatrices[].vehicleStartTag; this one matches ${matched}.`,
         );
+      }
+    }
+    for (const name of ["routeDurationLimit", "travelDurationLimit"] as const) {
+      const limit = isObject(vehicle[name]) ? vehicle[name] : {};
+      if (present(limit.costPerHourAfterSoftMax) && !present(limit.softMaxDuration)) {
+        add("MISSING_REQUIRED_FIELD", `${at}.${name}.softMaxDuration`, "costPerHourAfterSoftMax needs softMaxDuration.");
+      }
+      const soft = tryDuration(limit.softMaxDuration);
+      const hard = tryDuration(limit.maxDuration);
+      if (soft !== undefined && hard !== undefined && soft >= hard) {
+        add("INVALID_VALUE", `${at}.${name}.softMaxDuration`, "softMaxDuration must be less than maxDuration.");
+      }
+    }
+    const distance = isObject(vehicle.routeDistanceLimit) ? vehicle.routeDistanceLimit : {};
+    if (present(distance.costPerKilometerAboveSoftMax) && !present(distance.softMaxMeters)) {
+      add("MISSING_REQUIRED_FIELD", `${at}.routeDistanceLimit.softMaxMeters`, "costPerKilometerAboveSoftMax needs softMaxMeters.");
+    }
+    if (typeof distance.softMaxMeters === "number" && typeof distance.maxMeters === "number" && distance.softMaxMeters >= distance.maxMeters) {
+      add("INVALID_VALUE", `${at}.routeDistanceLimit.softMaxMeters`, "softMaxMeters must be less than maxMeters.");
+    }
+    if (isObject(vehicle.loadLimits)) {
+      for (const [key, limit] of Object.entries(vehicle.loadLimits)) {
+        if (isReservedMapKey(key) || !isObject(limit)) continue;
+        const keyAt = joinPath(`${at}.loadLimits`, key, "key");
+        // GMPRO's soft_max_load and cost_per_unit_above_soft_max are plain proto3 fields, so a cost
+        // alone is a soft max load of 0. The limit is active when the cost is above 0; a softMaxLoad
+        // with no cost charges nothing and is never refused.
+        const active = typeof limit.costPerUnitAboveSoftMax === "number" && limit.costPerUnitAboveSoftMax > 0;
+        if (active && paired.has(key)) {
+          add("INVALID_VALUE", joinPath(keyAt, "softMaxLoad"), "A soft load limit needs a load type that only pickups or only deliveries use.");
+        }
       }
     }
     const breakRule = isObject(vehicle.breakRule) ? vehicle.breakRule : {};

@@ -34,6 +34,8 @@ export type FieldType = "object" | "any" | "string" | "boolean" | "number" | "in
 export interface EnumValue {
   value: string;
   status: FieldStatus;
+  /** The proto enum number; absent for Unmap's own string enums (unmapProfile). */
+  number?: number;
   /** The exact error text when this value is sent and its status is not `supported`. */
   message?: string;
 }
@@ -127,11 +129,17 @@ const planned = (path: string, type: FieldType, version: "planned-v2" | "planned
   ...extra,
 });
 
-/** Enum values with statuses; a value's message names the row path. */
-const values = (path: string, entries: Record<string, FieldStatus>): EnumValue[] =>
-  Object.entries(entries).map(([value, status]) =>
-    status === "supported" ? { value, status } : { value, status, message: `${path} ${value} is not supported yet (planned for ${versionOf(status)}).` },
-  );
+/**
+ * Enum values with statuses, in proto order. `numbered` gives each value its proto number
+ * (GMPRO's enums count from 0 in declaration order); Unmap's own string enums pass false.
+ */
+const values = (path: string, entries: Record<string, FieldStatus>, numbered = true): EnumValue[] =>
+  Object.entries(entries).map(([value, status], number) => ({
+    value,
+    status,
+    ...(numbered ? { number } : {}),
+    ...(status === "supported" ? {} : { message: `${path} ${value} is not supported yet (planned for ${versionOf(status)}).` }),
+  }));
 
 const nonNegative: Extra = { minimum: 0 };
 
@@ -205,10 +213,10 @@ function timeWindowRows(path: string, what: string, vehicle?: { name: string }):
     head,
     supported(`${item}.startTime`, "timestamp", "Earliest allowed time; defaults to model.globalStartTime."),
     supported(`${item}.endTime`, "timestamp", "Latest allowed time; defaults to model.globalEndTime."),
-    planned(`${item}.softStartTime`, "timestamp", "planned-v2", "Soft start: arriving before it is allowed but costs extra."),
-    planned(`${item}.softEndTime`, "timestamp", "planned-v2", "Soft end: arriving after it is allowed but costs extra."),
-    planned(`${item}.costPerHourBeforeSoftStartTime`, "number", "planned-v2", "Cost per hour of arriving before the soft start."),
-    planned(`${item}.costPerHourAfterSoftEndTime`, "number", "planned-v2", "Cost per hour of arriving after the soft end."),
+    supported(`${item}.softStartTime`, "timestamp", "Soft start: an event before it is allowed and costs costPerHourBeforeSoftStartTime per hour early. Only on a list with a single window, at or after startTime, inside the global window."),
+    supported(`${item}.softEndTime`, "timestamp", "Soft end: an event after it is allowed and costs costPerHourAfterSoftEndTime per hour late. Only on a list with a single window, at or before endTime, inside the global window."),
+    supported(`${item}.costPerHourBeforeSoftStartTime`, "number", "Cost per hour of an event before softStartTime; needs softStartTime.", nonNegative),
+    supported(`${item}.costPerHourAfterSoftEndTime`, "number", "Cost per hour of an event after softEndTime; needs softEndTime.", nonNegative),
   ];
 }
 
@@ -243,9 +251,9 @@ function durationLimitRows(path: string, what: string): FieldRow[] {
   return [
     supported(path, "object", `Limits on ${what}.`),
     supported(`${path}.maxDuration`, "duration", `Hard maximum ${what}.`, nonNegative),
-    planned(`${path}.softMaxDuration`, "duration", "planned-v3", `Soft maximum ${what}; going over it costs extra.`),
+    supported(`${path}.softMaxDuration`, "duration", `Soft maximum ${what}: going over it costs costPerHourAfterSoftMax per hour; below maxDuration when both are set.`, nonNegative),
     planned(`${path}.quadraticSoftMaxDuration`, "duration", "planned-v3", `Soft maximum ${what} with a cost that grows with the square of the excess.`),
-    planned(`${path}.costPerHourAfterSoftMax`, "number", "planned-v3", "Cost per hour over the soft maximum."),
+    supported(`${path}.costPerHourAfterSoftMax`, "number", "Cost per hour over softMaxDuration; needs softMaxDuration.", nonNegative),
     planned(`${path}.costPerSquareHourAfterQuadraticSoftMax`, "number", "planned-v3", "Cost per square hour over the quadratic soft maximum."),
   ];
 }
@@ -294,8 +302,8 @@ export const FIELDS: readonly FieldRow[] = [
       TRANSFORM_AND_RETURN_REQUEST: "planned-v3",
     }),
   }),
-  planned("searchMode", "enum", "planned-v2", "Trades solution quality for latency.", {
-    enumValues: values("searchMode", { SEARCH_MODE_UNSPECIFIED: "supported", RETURN_FAST: "planned-v2", CONSUME_ALL_AVAILABLE_TIME: "planned-v2" }),
+  supported("searchMode", "enum", "Trades solution quality for latency: RETURN_FAST stops improving soon after the first solution, CONSUME_ALL_AVAILABLE_TIME (the default behaviour) searches until the timeout.", {
+    enumValues: values("searchMode", { SEARCH_MODE_UNSPECIFIED: "supported", RETURN_FAST: "supported", CONSUME_ALL_AVAILABLE_TIME: "supported" }),
   }),
   planned("injectedFirstSolutionRoutes", "any", "planned-v2", "Routes the solver starts from instead of building its own first solution.", { repeated: true }),
   planned("injectedSolutionConstraint", "any", "planned-v2", "A previous solution whose visits are frozen or constrained, for re-optimization."),
@@ -381,8 +389,8 @@ export const FIELDS: readonly FieldRow[] = [
   }),
   supported(`${V}.loadLimits`, "object", `Capacity per load type name. Its keys count toward the ${MAX_LOAD_TYPES} distinct load types a request may use.`, { map: true }),
   supported(`${V}.loadLimits{}.maxLoad`, "int64", "Most units of this load type the vehicle may carry at once; absent means unlimited.", nonNegative),
-  planned(`${V}.loadLimits{}.softMaxLoad`, "int64", "planned-v2", "Load above which each extra unit costs costPerUnitAboveSoftMax."),
-  planned(`${V}.loadLimits{}.costPerUnitAboveSoftMax`, "number", "planned-v2", "Cost per unit of load above the soft maximum."),
+  supported(`${V}.loadLimits{}.softMaxLoad`, "int64", "Load above which each extra unit costs costPerUnitAboveSoftMax; absent means 0. Charges nothing without a cost above 0.", nonNegative),
+  supported(`${V}.loadLimits{}.costPerUnitAboveSoftMax`, "number", "Cost per unit of peak load above softMaxLoad (0 when absent). A cost above 0 needs a load type that pickups alone or deliveries alone use.", nonNegative),
   planned(`${V}.loadLimits{}.startLoadInterval`, "object", "planned-v2", "Allowed load when the route starts."),
   planned(`${V}.loadLimits{}.endLoadInterval`, "object", "planned-v2", "Allowed load when the route ends."),
   planned(`${V}.loadLimits{}.costPerKilometer`, "object", "planned-v3", "Load-dependent cost per kilometre (experimental in GMPRO)."),
@@ -396,9 +404,21 @@ export const FIELDS: readonly FieldRow[] = [
   ...durationLimitRows(`${V}.travelDurationLimit`, "driving time over the route"),
   supported(`${V}.routeDistanceLimit`, "object", "Limits on the distance driven over the route."),
   supported(`${V}.routeDistanceLimit.maxMeters`, "int64", "Hard maximum distance in metres, at most 1,000,000,000 (the solver's unreachable value).", { ...nonNegative, maximum: 1_000_000_000 }),
-  planned(`${V}.routeDistanceLimit.softMaxMeters`, "int64", "planned-v3", "Soft maximum distance in metres; going over it costs extra.", { presenceCounts: true }),
-  planned(`${V}.routeDistanceLimit.costPerKilometerBelowSoftMax`, "number", "planned-v3", "Cost per kilometre up to the soft maximum.", { presenceCounts: true }),
-  planned(`${V}.routeDistanceLimit.costPerKilometerAboveSoftMax`, "number", "planned-v3", "Cost per kilometre over the soft maximum."),
+  supported(`${V}.routeDistanceLimit.softMaxMeters`, "int64", "Soft maximum distance in metres: going over it costs costPerKilometerAboveSoftMax per kilometre; below maxMeters when both are set.", { ...nonNegative, presenceCounts: true }),
+  {
+    path: `${V}.routeDistanceLimit.costPerKilometerBelowSoftMax`,
+    type: "number",
+    status: "rejected",
+    description: "Cost per kilometre up to the soft maximum.",
+    // No rejected-specific code exists beyond PLACE_ID_NOT_SUPPORTED; GMPRO itself refuses the
+    // field as an invalid argument, and INVALID_VALUE is Unmap's code for a value a field cannot take.
+    code: "INVALID_VALUE",
+    message: "routeDistanceLimit.costPerKilometerBelowSoftMax is not supported: GMPRO does not support it in route_distance_limit either.",
+    hint: "Remove the field; costPerKilometer charges every kilometre driven.",
+    rationale: "Rejected: GMPRO's own proto says this cost is not supported in route_distance_limit, so no GMPRO request can depend on it.",
+    presenceCounts: true,
+  },
+  supported(`${V}.routeDistanceLimit.costPerKilometerAboveSoftMax`, "number", "Cost per kilometre over softMaxMeters; needs softMaxMeters.", nonNegative),
   planned(`${V}.extraVisitDurationForVisitType`, "duration", "planned-v2", "Extra time this vehicle spends at visits of a given type.", { map: true }),
   supported(`${V}.breakRule`, "object", "Breaks the driver must take."),
   supported(`${V}.breakRule.breakRequests`, "object", "Breaks, in the order they must happen.", { repeated: true }),
@@ -411,7 +431,7 @@ export const FIELDS: readonly FieldRow[] = [
   planned(`${V}.travelDurationMultiple`, "number", "planned-v2", "Multiplies every travel duration for this vehicle, for slower or faster vehicles.", { default: 1, presenceCounts: true }),
   supported(`${V}.unmapProfile`, "enum", "Unmap extension: the road network profile the vehicle's travel times come from.", {
     default: "auto",
-    enumValues: values(`${V}.unmapProfile`, { auto: "supported", truck: "planned-v2", pedestrian: "planned-v2" }),
+    enumValues: values(`${V}.unmapProfile`, { auto: "supported", truck: "planned-v2", pedestrian: "planned-v2" }, false),
   }),
 ];
 
@@ -444,4 +464,12 @@ for (const row of FIELDS) {
 /** The rows directly under an object row (`""` for the request root), keyed by field name, in table order. */
 export function childrenOf(path: string): ReadonlyMap<string, FieldRow> {
   return childrenByParent.get(path) ?? new Map();
+}
+
+/** The enum name for `value` (a name, or a proto integer) at table `path`; undefined when it is neither. */
+export function enumNameOf(path: string, value: unknown): string | undefined {
+  const known = fieldByPath(path)?.enumValues ?? [];
+  if (typeof value === "string") return known.find((v) => v.value === value)?.value;
+  if (typeof value === "number" && Number.isInteger(value)) return known.find((v) => v.number === value)?.value;
+  return undefined;
 }
