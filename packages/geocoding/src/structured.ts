@@ -1,4 +1,12 @@
-import { parseRegion, REGION_CODES } from "./regions";
+import {
+  DEFAULT_COUNTRY,
+  parseCountry,
+  parsePostalCode,
+  parseSubdivision,
+  subdivisionCodes,
+  COUNTRY_CODES,
+  type CountryCode,
+} from "./countries";
 
 /**
  * Structured forward geocoding: the caller hands over the components of an address instead of
@@ -13,7 +21,9 @@ import { parseRegion, REGION_CODES } from "./regions";
  *     records that contradict it, and never excludes records that are silent about it.** A row
  *     in Ontario is out when you asked for Alberta; a row with no province at all stays in and
  *     comes back with `region_not_verified` in its `match_reasons`.
- *   - `country` is validated, not matched: the corpus is Canada only.
+ *   - `country` scopes everything else and constrains outright: a row in another country is never
+ *     a candidate. It also decides how `region` and `postalcode` are read, so `region=CA` is
+ *     California under `country=US` and an error under the default, Canada.
  *
  * The alternative — joining the fields into one string and running the free-text engine — is
  * what this exists instead of. It would make `region` a scoring token that any row could match
@@ -23,15 +33,24 @@ export interface StructuredQuery {
   /** Street line: civic number and street name, as the caller would write it on an envelope. */
   address?: string;
   city?: string;
-  /** Two-letter code, normalised from any accepted spelling ("Québec" and "qc" both give "QC"). */
+  /**
+   * The subdivision's code inside `country`, normalised from any accepted spelling ("Québec" and
+   * "qc" both give "QC"; "California" under `country=US` gives "CA").
+   */
   region?: string;
-  /** Six characters, no space, uppercase ("M5H2N2"). */
+  /** The country's own syntax, normalised: "M5H2N2", "02134" or "02134-1234", "01000". */
   postalcode?: string;
-  /** Always "CA". Present so the field can be supplied and validated, not so it can vary. */
-  country?: string;
+  /** ISO code. Omitted on input, it is Canada, which every earlier client meant. */
+  country?: CountryCode;
 }
 
-export interface StructuredOptions extends StructuredQuery {
+export interface StructuredOptions extends Omit<StructuredQuery, "country"> {
+  /**
+   * ISO code or name ("US", "México"). Omitted, Canada. `region` and `postalcode` are read in
+   * this country's rules. A country geocoding has not released rejects with status 422 and code
+   * `outside_coverage`.
+   */
+  country?: string;
   limit?: number;
   lang?: string;
   /** [minLng, minLat, maxLng, maxLat] hard filter, same semantics as `search`. */
@@ -53,8 +72,6 @@ export const STRUCTURED_FIELDS = ["address", "city", "region", "postalcode", "co
  */
 const ANCHOR_FIELDS = ["address", "city", "postalcode"] as const;
 
-const POSTCODE = /^[A-Z]\d[A-Z]\d[A-Z]\d$/;
-
 export type StructuredParseResult = { query: StructuredQuery } | { error: string };
 
 /** Normalise and validate raw structured input. Returns the cleaned query or one error string. */
@@ -64,27 +81,32 @@ export function parseStructuredQuery(raw: Partial<Record<string, string | undefi
     return t === "" ? undefined : t;
   };
 
-  const country = trim(raw.country);
-  if (country && !/^(ca|can|canada)$/i.test(country)) {
-    return { error: `country must be CA: unmap covers Canada only (got "${country}")` };
+  const rawCountry = trim(raw.country);
+  let country: CountryCode = DEFAULT_COUNTRY;
+  if (rawCountry) {
+    const parsed = parseCountry(rawCountry);
+    if (!parsed) return { error: `unknown country "${rawCountry}". Use ${COUNTRY_CODES.join(", ")}` };
+    country = parsed;
   }
 
   let region: string | undefined;
   const rawRegion = trim(raw.region);
   if (rawRegion) {
-    region = parseRegion(rawRegion);
+    region = parseSubdivision(country, rawRegion);
     if (!region) {
-      return { error: `unknown region "${rawRegion}". Use a province or territory code: ${REGION_CODES.join(", ")}` };
+      const kind = country === "CA" ? "a province or territory" : "a state";
+      return {
+        error: `unknown region "${rawRegion}" in ${country}. Use ${kind} code: ${subdivisionCodes(country).join(", ")}`,
+      };
     }
   }
 
   let postalcode: string | undefined;
   const rawPostal = trim(raw.postalcode);
   if (rawPostal) {
-    postalcode = rawPostal.replace(/\s+/g, "").toUpperCase();
-    if (!POSTCODE.test(postalcode)) {
-      return { error: `postalcode must be a Canadian postal code such as M5H 2N2 (got "${rawPostal}")` };
-    }
+    const parsed = parsePostalCode(country, rawPostal);
+    if ("error" in parsed) return parsed;
+    postalcode = parsed.postalcode;
   }
 
   const query: StructuredQuery = {
@@ -92,7 +114,7 @@ export function parseStructuredQuery(raw: Partial<Record<string, string | undefi
     ...(trim(raw.city) ? { city: trim(raw.city) } : {}),
     ...(region ? { region } : {}),
     ...(postalcode ? { postalcode } : {}),
-    country: "CA",
+    country,
   };
 
   if (!ANCHOR_FIELDS.some((f) => query[f] != null)) {

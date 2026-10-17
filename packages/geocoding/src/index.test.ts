@@ -36,6 +36,34 @@ describe("Geocoder", () => {
     for (const part of ["key=um_test_x", "q=calgary", "limit=3", "lang=fr"]) expect(url).toContain(part);
   });
 
+  it("sends country on every forward and coordinate method", async () => {
+    const urls: string[] = [];
+    const f = vi.fn(async (url: string) => {
+      urls.push(String(url));
+      return { ok: true, status: 200, json: async () => [] };
+    }) as unknown as typeof fetch;
+    const g = new Geocoder({ key: "k", fetch: f });
+    await g.search("Windsor", { country: ["CA", "US"] });
+    await g.autocomplete("Winds", { country: "US" });
+    await g.reverse(-83.03, 42.31, { country: "CA" });
+    await g.nearby("pharmacy", { near: [-83.03, 42.31], country: "CA" });
+    await g.structured({ city: "Sacramento", region: "California", country: "United States" });
+    await g.search("Windsor");
+    expect(urls[0]).toContain("country=CA%2CUS");
+    expect(urls[1]).toContain("country=US");
+    expect(urls[2]).toContain("country=CA");
+    expect(urls[3]).toContain("country=CA");
+    expect(urls[4]).toContain("country=United+States");
+    expect(urls[5]).not.toContain("country=");
+  });
+
+  it("puts country in the batch body", async () => {
+    const f = mockFetch([[]]);
+    await new Geocoder({ key: "k", fetch: f }).batch(["Windsor"], { country: "US" });
+    const [, init] = (f as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]!;
+    expect(JSON.parse(String((init as RequestInit).body))).toMatchObject({ country: "US" });
+  });
+
   it("reverse sends near=lng,lat", async () => {
     const f = mockFetch([]);
     await new Geocoder({ key: "k", fetch: f }).reverse(-68.517, 63.7467);
@@ -238,6 +266,7 @@ describe("identify", () => {
       "survey.dls",
       "survey.nts",
       "survey.parcels",
+      "survey.plss",
       "energy.wells",
       "energy.pipelines",
       "energy.facilities",
@@ -253,6 +282,7 @@ describe("identify", () => {
       "survey.dls",
       "survey.nts",
       "survey.parcels",
+      "survey.plss",
     ]);
     expect(ENERGY_IDENTIFY_LAYER_IDS).toEqual(["energy.wells", "energy.pipelines", "energy.facilities"]);
     expect(MINING_IDENTIFY_LAYER_IDS).toEqual([

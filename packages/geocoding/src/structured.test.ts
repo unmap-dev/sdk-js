@@ -35,9 +35,27 @@ describe("parseStructuredQuery", () => {
     expect(e).toMatch(/AB, BC/);
   });
 
-  it("rejects a country that is not Canada", () => {
-    expect(err(parseStructuredQuery({ city: "Buffalo", country: "US" }))).toMatch(/Canada only/);
+  it("reads country CA as Canada and rejects a country it cannot name", () => {
     expect(ok(parseStructuredQuery({ city: "Calgary", country: "canada" })).country).toBe("CA");
+    expect(err(parseStructuredQuery({ city: "Paris", country: "FR" }))).toMatch(/unknown country "FR". Use CA, US, MX/);
+  });
+
+  it("reads region inside the country: CA is California in the US and not a province in Canada", () => {
+    expect(ok(parseStructuredQuery({ city: "Sacramento", region: "CA", country: "US" })).region).toBe("CA");
+    expect(ok(parseStructuredQuery({ city: "Sacramento", region: "California", country: "USA" })).country).toBe("US");
+    expect(err(parseStructuredQuery({ city: "Sacramento", region: "CA" }))).toMatch(/unknown region "CA" in CA/);
+    expect(ok(parseStructuredQuery({ city: "Buffalo", region: "NY", country: "US" })).region).toBe("NY");
+    expect(ok(parseStructuredQuery({ city: "Monterrey", region: "Nuevo León", country: "México" })).region).toBe("NLE");
+    expect(err(parseStructuredQuery({ city: "Calgary", region: "AB", country: "US" }))).toMatch(/unknown region "AB" in US/);
+  });
+
+  it("reads postal codes by the country's own syntax and keeps leading zeros", () => {
+    expect(ok(parseStructuredQuery({ postalcode: "02134", country: "US" })).postalcode).toBe("02134");
+    expect(ok(parseStructuredQuery({ postalcode: "02134-1234", country: "US" })).postalcode).toBe("02134-1234");
+    expect(ok(parseStructuredQuery({ postalcode: "021341234", country: "US" })).postalcode).toBe("02134-1234");
+    expect(ok(parseStructuredQuery({ postalcode: "01000", country: "MX" })).postalcode).toBe("01000");
+    expect(err(parseStructuredQuery({ postalcode: "M5H 2N2", country: "US" }))).toMatch(/US ZIP code/);
+    expect(err(parseStructuredQuery({ postalcode: "1000", country: "MX" }))).toMatch(/five-digit Mexican/);
   });
 
   it("refuses a search that is only a province", () => {

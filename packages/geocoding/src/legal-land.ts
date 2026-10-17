@@ -4,9 +4,16 @@
  *
  * A successful parse is a structured candidate, not a geocoder hit. Coordinates,
  * civic addresses, and place names return null — those stay on the civic path.
+ *
+ * US PLSS descriptions are parsed by `./plss` and surface here as `system: "PLSS"`. That grammar
+ * needs an explicit `T…N|S` and `R…E|W`, which no Canadian description carries, so it is tried
+ * before the Ontario lot grammar (which would otherwise read "Lot 3 Sec 5 T10S R22E" as an
+ * Ontario township named "Sec 5 T10s R22e") and cannot change a Canadian parse.
  */
 
-export type LegalLandSystem = "DLS" | "NTS" | "GTS" | "FPS" | "RIVER_LOT";
+import { parsePlss, type PlssDisambiguation } from "./plss";
+
+export type LegalLandSystem = "DLS" | "NTS" | "GTS" | "FPS" | "RIVER_LOT" | "PLSS";
 
 export type LegalLandUnit =
   | "lsd"
@@ -21,7 +28,8 @@ export type LegalLandUnit =
   | "grid"
   | "section"
   | "unit"
-  | "river_lot";
+  | "river_lot"
+  | "aliquot";
 
 export type LegalLandComponents = {
   meridian?: string;
@@ -48,6 +56,18 @@ export type LegalLandComponents = {
   townshipName?: string;
   kind?: string;
   parts?: string[];
+  /** PLSS: USPS state code, when the description names one or its meridian implies one. */
+  state?: string;
+  /** PLSS: principal meridian name. `meridian` carries the BLM code (`20`). */
+  meridianName?: string;
+  /** PLSS township direction. */
+  townshipDir?: "N" | "S";
+  /** PLSS range direction. */
+  rangeDir?: "E" | "W";
+  /** PLSS aliquot part, BLM label, smallest part first (`NWSE`, `N2NE`). */
+  aliquot?: string;
+  /** PLSS: the county the description names. Context only; it is not part of the lookup key. */
+  county?: string;
 };
 
 export type LegalLandParse = {
@@ -56,6 +76,12 @@ export type LegalLandParse = {
   unit: LegalLandUnit;
   components: LegalLandComponents;
   province?: string;
+  /**
+   * PLSS only: present when the description cannot be looked up as written (no meridian or
+   * state, a state with several meridians, or a state that never used the PLSS). The gateway
+   * answers `400` with these candidates rather than choosing one.
+   */
+  disambiguation?: PlssDisambiguation;
 };
 
 const SEP = String.raw`(?:\s*-\s*|\s+)`;
@@ -339,11 +365,30 @@ export function parseLegalLand(q: string): LegalLandParse | null {
   const raw = sanitize(q);
   if (!raw) return null;
 
-  return parseFps(raw) ?? parseGts(raw) ?? parseRiverLot(raw) ?? parseDls(raw) ?? parseNts(raw);
+  return (
+    parseFps(raw) ??
+    parsePlssLegalLand(raw) ??
+    parseGts(raw) ??
+    parseRiverLot(raw) ??
+    parseDls(raw) ??
+    parseNts(raw)
+  );
+}
+
+function parsePlssLegalLand(q: string): LegalLandParse | null {
+  const plss = parsePlss(q);
+  if (!plss) return null;
+  return {
+    system: "PLSS",
+    canonical: plss.canonical,
+    unit: plss.unit,
+    components: { ...plss.components },
+    ...(plss.disambiguation ? { disambiguation: plss.disambiguation } : {}),
+  };
 }
 
 /** Public `legal_land.system` values on a geocode result (LOCATION-MODEL). */
-export type LegalLandLayerSystem = "dls" | "nts" | "fps" | "on" | "river_lot";
+export type LegalLandLayerSystem = "dls" | "nts" | "fps" | "on" | "river_lot" | "plss";
 
 const LAYER_SYSTEM: Record<LegalLandSystem, LegalLandLayerSystem> = {
   DLS: "dls",
@@ -351,6 +396,7 @@ const LAYER_SYSTEM: Record<LegalLandSystem, LegalLandLayerSystem> = {
   GTS: "on",
   FPS: "fps",
   RIVER_LOT: "river_lot",
+  PLSS: "plss",
 };
 
 /** True when `q` is a well-formed legal-land description, not a civic query. */
@@ -358,12 +404,40 @@ export function looksLikeLegalLand(q: string): boolean {
   return parseLegalLand(q) != null;
 }
 
+/**
+ * Where a PLSS answer came from. Only PLSS results carry it today: the Canadian rows were
+ * imported without record ids, so there is nothing comparable to report for them.
+ */
+export interface LegalLandProvenance {
+  /** Source dataset, e.g. "Township America PLSS lookup (from BLM CadNSDI V2)". */
+  dataset: string;
+  /** Import release the Land container answered from. */
+  release?: string;
+  /** The BLM CadNSDI ids (PLSSID, FRSTDIVID, SECDIVID) the source carries for the polygons in the answer. */
+  record_ids: string[];
+  /** The source table's own row ids for the polygons in the answer. */
+  source_ids?: string[];
+  /** `record`: one stored polygon. `quarter_quarters`: the union of stored quarter-quarters. */
+  assembled_from: "record" | "quarter_quarters";
+  /** County the source records for the cell. */
+  county?: string;
+  /** Area of the polygon as stored, in acres. Not a surveyed acreage. */
+  mapped_acres: number;
+  /** True when a published ring was invalid and was made valid on import. */
+  geometry_repaired?: boolean;
+  /** What the geometry is and is not. */
+  accuracy: string;
+}
+
 export interface LegalLandDetails {
   system: LegalLandLayerSystem;
   province?: string;
+  /** PLSS: USPS state code. Canadian systems use `province`. */
+  state?: string;
   canonical: string;
   unit: LegalLandUnit;
   components: LegalLandComponents;
+  provenance?: LegalLandProvenance;
 }
 
 /** Map a parse onto the public result block. Does not invent coordinates. */
@@ -371,6 +445,7 @@ export function toLegalLandDetails(parsed: LegalLandParse): LegalLandDetails {
   return {
     system: LAYER_SYSTEM[parsed.system],
     ...(parsed.province ? { province: parsed.province } : {}),
+    ...(parsed.system === "PLSS" && parsed.components.state ? { state: parsed.components.state } : {}),
     canonical: parsed.canonical,
     unit: parsed.unit,
     components: parsed.components,

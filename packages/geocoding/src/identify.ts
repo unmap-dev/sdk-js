@@ -13,6 +13,8 @@ export const LAND_IDENTIFY_LAYER_IDS = [
   "survey.dls",
   "survey.nts",
   "survey.parcels",
+  // US PLSS from Township America (built from BLM CadNSDI), its own table in the Land container (pipeline/plss). Montana pilot.
+  "survey.plss",
 ] as const;
 
 export const ENERGY_IDENTIFY_LAYER_IDS = [
@@ -109,6 +111,8 @@ export interface IdentifyResult {
   id: string;
   name: string;
   province?: string;
+  /** USPS state code on a US row (`survey.plss`). Canadian rows use `province`. */
+  state?: string;
   unit?: string;
   survey_system?: string;
   uwi?: string;
