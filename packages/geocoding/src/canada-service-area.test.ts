@@ -41,6 +41,21 @@ const INSIDE: ReadonlyArray<readonly [string, number, number]> = [
   ["Île aux Grues", -70.5433, 47.0681],
   ["St. Stephen", -67.276, 45.194],
   ["Morrisburg", -75.184, 44.898],
+  // Canadian towns on the land border, each inside the Statistics Canada boundary file.
+  ["White Rock", -122.8026, 49.0253],
+  ["Surrey, Douglas crossing", -122.7565, 49.0045],
+  ["Huntingdon, Abbotsford", -122.265, 49.0035],
+  ["Osoyoos", -119.4682, 49.0323],
+  ["Coutts", -111.959, 49.001],
+  ["North Portal", -102.5527, 49.0033],
+  ["Emerson", -97.2096, 49.0058],
+  ["Stanstead", -72.0954, 45.0111],
+  ["Niagara Falls, ON", -79.0849, 43.0896],
+  ["Akwesasne, Cornwall Island", -74.71, 45.005],
+  // Canadian land the Natural Earth border left out, put back by the border pass.
+  ["Tsawwassen beside Point Roberts", -123.0386, 49.0073],
+  ["Yukon beside the 141st meridian", -141.0103, 68.0],
+  ["New Brunswick beside the due-north line", -67.7813, 46.5],
 ];
 
 const OUTSIDE: ReadonlyArray<readonly [string, number, number]> = [
@@ -74,6 +89,16 @@ const OUTSIDE: ReadonlyArray<readonly [string, number, number]> = [
   ["Blaine", -122.755, 48.99],
   ["Eastport", -66.989, 44.906],
   ["Lubec", -66.982, 44.858],
+  // United States towns within 0.012° of the 49th parallel, which the mask answered as Canadian
+  // until the border pass (pipeline/geocoding/service-area-border.py).
+  ["downtown Blaine", -122.7471, 48.9937],
+  ["Sumas", -122.2643, 48.9998],
+  ["Sweetgrass", -111.9606, 48.9978],
+  ["Roosville", -115.0554, 48.9975],
+  ["Portal, ND", -102.5496, 48.9958],
+  ["Noyes", -97.2025, 48.9989],
+  ["Alaska beside the 141st meridian", -141.0153, 68.0],
+  ["Maine beside the due-north line", -67.7893, 46.5],
 ];
 
 describe("Canadian service area", () => {

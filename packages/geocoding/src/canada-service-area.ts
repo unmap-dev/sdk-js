@@ -17,9 +17,15 @@ import area from "./canada-service-area.json";
  * Crow Head, and St. Brendan's stay inside. United States land more than 0.012° outside
  * the Canada polygon is cut back out, so Eastport and the Alaska shore south of Hyder stay
  * out. Water within 0.02° of the United States shore and outside that polygon is cut back
- * out, so Lubec stays out. Detroit, Port Huron, Point Roberts, and Blaine stay out. The
- * 0.012° simplification still covers a thinner sliver: Calais and St. Stephen's downtown
- * both sit in it.
+ * out, so Lubec stays out. Detroit, Port Huron, and Point Roberts stay out.
+ * On the 49th parallel, the 141st meridian, and the New Brunswick due-north line, the edge is
+ * then moved onto the Statistics Canada 2021 boundary by
+ * `pipeline/geocoding/service-area-border.py`: United States land on the far side is removed
+ * (downtown Blaine, Sumas, Sweetgrass, Roosville, Portal, and Noyes had been inside), and
+ * Canadian land the Natural Earth line left out is put back (a strip of Yukon along the 141st).
+ * The edge sits up to about 25 m on the United States side of that boundary, never inside
+ * Canada. Borders that follow rivers are not moved: Calais is still inside, beside St. Stephen,
+ * and so is Estcourt Station on the Quebec and Maine border.
  * Islands the admin file omits are included when the land file has them and they are closer
  * to Canada than to the United States, including Mayne Island, Big Tancook, and Île aux Grues.
  * A rectangle is not used: it cannot separate Windsor from Detroit.

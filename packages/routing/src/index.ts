@@ -373,17 +373,6 @@ export interface TruckMeta {
    * about the graph, not about this route: no jurisdiction lookup is performed.
    */
   enrichedJurisdictions?: string[];
-  /**
-   * What the truck picture is worth in each country the route's endpoints fall in. Present only
-   * when an endpoint is outside Canada; a Canadian route never carries it.
-   *
-   * `enriched_corridors`: authoritative sources are in the graph for the subdivisions in
-   * `enrichedJurisdictions`. `basic_osm`: truck costing over OSM truck tags unmap has audited.
-   * `unverified`: truck costing over OSM tags nobody has audited, with no restriction source, so
-   * `verification` is `unknown`. `country` is null for a point outside every country mask the
-   * gateway holds. There is no status meaning "no restrictions".
-   */
-  jurisdictions?: { country: "CA" | "US" | "MX" | null; status: "enriched_corridors" | "basic_osm" | "unverified" }[];
 }
 
 /**

@@ -2,7 +2,6 @@ import { DEFAULT_GATEWAY, UnmapError, fetchWithRetry, parseRetryAfter, type Retr
 import type { LegalLandDetails } from "./legal-land";
 import type { IdentifyOptions, IdentifyResponse } from "./identify";
 import type { QueryOptions, QueryResponse } from "./query";
-import type { CountryCode } from "./countries";
 import type { StructuredOptions } from "./structured";
 import type { IncludeValue, TreatyContext } from "./treaties";
 
@@ -14,30 +13,9 @@ export {
   type LegalLandDetails,
   type LegalLandLayerSystem,
   type LegalLandParse,
-  type LegalLandProvenance,
   type LegalLandSystem,
   type LegalLandUnit,
 } from "./legal-land";
-
-export {
-  NON_PLSS_STATE_NAMES,
-  PLSS_MERIDIANS,
-  PLSS_STATE_NAMES,
-  aliquotQuarterQuarters,
-  parsePlss,
-  plssMeridian,
-  plssDisambiguationBody,
-  plssMeridiansForState,
-  plssSectionId,
-  plssTownshipId,
-  type PlssComponents,
-  type PlssDisambiguation,
-  type PlssDisambiguationBody,
-  type PlssDisambiguationReason,
-  type PlssMeridian,
-  type PlssParse,
-  type PlssUnit,
-} from "./plss";
 
 export {
   ENERGY_SEARCH_LAYERS,
@@ -155,20 +133,6 @@ export {
   parseRegion,
   regionForms,
 } from "./regions";
-
-export {
-  COUNTRY_CODES,
-  DEFAULT_COUNTRY,
-  parseCountry,
-  parseCountryList,
-  parsePostalCode,
-  parseSubdivision,
-  subdivisionCodes,
-  subdivisionForms,
-  type CountryCode,
-  type CountryListParse,
-  type PostalParse,
-} from "./countries";
 
 export {
   STRUCTURED_FIELDS,
@@ -309,13 +273,6 @@ export interface GeocodeResult {
     country?: string;
     /** Unit/suite, where the source published one. Most of the corpus does not. */
     unit?: string;
-    /**
-     * Colonia or other asentamiento, where a Mexican source published one. Mexico is not a
-     * released country yet, so no served result carries it today.
-     */
-    district?: string;
-    /** Municipio or alcaldía, where a Mexican source published one. Same status as `district`. */
-    municipality?: string;
   };
   /** Structured legal-land parse; only `layer: "legal_land"` results carry it. */
   legal_land?: LegalLandDetails;
@@ -358,27 +315,9 @@ export interface SearchOptions {
    * corpus instead and need the energy add-on. The two sets cannot be mixed.
    */
   layers?: string;
-  /**
-   * Subdivision, any accepted spelling, read inside `country`: with no `country` it is a
-   * Canadian province or territory. Excludes rows in another one.
-   */
+  /** Province or territory, any accepted spelling. Excludes rows in another province. */
   region?: string;
-  /**
-   * Countries a result may be in. Omitted, every country geocoding has released, which today is
-   * Canada. A country the contract names but geocoding has not released rejects with status 422
-   * and code `outside_coverage`, so `country: "US"` never comes back with Canadian rows.
-   */
-  country?: CountryScopeOption;
   signal?: AbortSignal;
-}
-
-/** One ISO country code or several. Accepted spellings beyond the code are a REST concern. */
-export type CountryScopeOption = CountryCode | readonly CountryCode[];
-
-function countryParam(country: CountryScopeOption | undefined): string | undefined {
-  if (country == null) return undefined;
-  const list = typeof country === "string" ? [country] : [...country];
-  return list.length ? list.join(",") : undefined;
 }
 
 /**
@@ -395,8 +334,6 @@ export interface TreatyOptions {
 export interface ReverseOptions extends TreatyOptions {
   lang?: string;
   limit?: number;
-  /** Countries a result may be in; same rules as `SearchOptions.country`. */
-  country?: CountryScopeOption;
   signal?: AbortSignal;
 }
 
@@ -409,8 +346,6 @@ export interface NearbyOptions {
   radius?: number;
   limit?: number;
   lang?: string;
-  /** Countries a result may be in; same rules as `SearchOptions.country`. */
-  country?: CountryScopeOption;
   signal?: AbortSignal;
 }
 
@@ -545,7 +480,6 @@ export class Geocoder {
         radius: opts.radius != null ? String(opts.radius) : undefined,
         limit: opts.limit != null ? String(opts.limit) : undefined,
         lang: opts.lang,
-        country: countryParam(opts.country),
       },
       opts.signal,
     );
@@ -563,7 +497,6 @@ export class Geocoder {
         near: `${lng},${lat}`,
         lang: opts.lang,
         limit: opts.limit != null ? String(opts.limit) : undefined,
-        country: countryParam(opts.country),
         ...treatyParams(opts),
       },
       opts.signal,
@@ -656,7 +589,6 @@ function toBatchBody(o: SearchOptions): Record<string, unknown> {
     ...(o.bbox ? { bbox: o.bbox.join(",") } : {}),
     ...(o.focus ? { focus: o.focus.join(",") } : {}),
     ...(o.region ? { region: o.region } : {}),
-    ...(countryParam(o.country) ? { country: countryParam(o.country) } : {}),
     ...(o.layers ? { layers: o.layers } : {}),
   };
 }
@@ -673,7 +605,6 @@ function toParams(o: SearchOptions & TreatyOptions): Record<string, string | und
     bbox: o.bbox ? o.bbox.join(",") : undefined,
     focus: o.focus ? o.focus.join(",") : undefined,
     region: o.region,
-    country: countryParam(o.country),
     geometry: o.geometry ? "true" : undefined,
     layers: o.layers,
     ...treatyParams(o),

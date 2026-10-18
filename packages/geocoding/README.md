@@ -40,10 +40,6 @@ The SDK name is `unmap.data.query`.
 (`pharmacy`, `pharmacie`), one at a time or up to eight as an array. A non-2xx response
 throws a `GeocoderError` carrying the HTTP `status` and, when the body has one, `code`.
 A coordinate outside Canada on `nearby` or `reverse` is status `422` and code `outside_coverage`.
-Every method takes `country` (`'CA'`, `'US'`, `'MX'`, or a list); omitted, it is the countries
-geocoding has released, which today is Canada only, and an unreleased country is the same `422`.
-`structured` reads `region` and `postalcode` in that country's rules, so `region: 'CA'` is
-California under `country: 'US'`.
 A longitude or latitude outside WGS84, including a bbox corner, is status `400` and code
 `bad_request`. A text search with no match is an empty list.
 
