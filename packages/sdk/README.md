@@ -97,7 +97,7 @@ Everything above is on the `unmap` global: `unmap.Unmap`, `unmap.Geocoder`, `unm
 | `theme`     | `string`                | A theme code (`u…` or `ut1.`) from [unmap.dev/create](https://unmap.dev/create). |
 | `center`    | `[lng, lat]`            | Initial centre.                                                              |
 | `zoom`      | `number`                | Initial zoom.                                                                |
-| `projection` | `'globe' \| 'mercator'` | `'globe'` draws the map as a sphere. Defaults to `'mercator'`.              |
+| `projection` | `'globe' \| 'mercator'` | `'globe'` (the default) draws the map as a sphere; `'mercator'` is the flat map. |
 | `controls`  | `boolean \| { position }` | Zoom and compass buttons. `true` by default; `false` for a bare canvas.     |
 
 The instance exposes `.map` (MapLibre GL `Map`, only with a `container`), `.geocoder`

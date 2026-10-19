@@ -64,7 +64,7 @@ export interface UnmapOptions {
   overlays?: readonly string[];
   /** Composition preset. Not a style. Explicit overlays replace the profile list. */
   profile?: MapProfile;
-  /** `"globe"` or `"mercator"`. See `@unmap/maps` `UnmapMapOptions.projection`. */
+  /** `"globe"` (the default) or `"mercator"`. See `@unmap/maps` `UnmapMapOptions.projection`. */
   projection?: UnmapMapOptions["projection"];
   center?: [number, number];
   zoom?: number;

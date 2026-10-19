@@ -29,7 +29,8 @@ Options are `key`, `container`, `gateway`, `style` (`base`, `muted`, `outdoor`, 
 URL), `mode`, `lang`, `theme`, `center`, `zoom`, `projection`, `controls`, and
 `maplibre` for any extra `maplibre-gl` `MapOptions`, merged last.
 
-`projection: "globe"` draws the map as a sphere; omit it, or pass `"mercator"`, for the flat map.
+The map is a globe by default: zoomed out it is a sphere, and it flattens into Mercator as you
+zoom in. Pass `projection: "mercator"` for the flat map at every zoom.
 A city centre with no zoom still frames the city rather than the planet.
 
 Arabic and Hebrew labels need no plugin. MapLibre 6.9 and later draw right-to-left and

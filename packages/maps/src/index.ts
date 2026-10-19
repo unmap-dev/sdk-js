@@ -3,6 +3,7 @@ import {
   NavigationControl,
   type ControlPosition,
   type MapOptions,
+  type ProjectionSpecification,
 } from "maplibre-gl";
 import { unmapStyle, type MapProfile } from "./style";
 
@@ -17,7 +18,7 @@ export * from "./style";
 export * as maplibregl from "maplibre-gl";
 export type { Map } from "maplibre-gl";
 
-/** Map projection. Mercator is the default; `globe` draws the map as a sphere. */
+/** Map projection. Globe is the default; `mercator` draws the flat map. */
 export type Projection = "globe" | "mercator";
 
 export interface UnmapMapOptions {
@@ -37,7 +38,8 @@ export interface UnmapMapOptions {
   /** Composition preset. Not a style. Explicit overlays replace the profile list. */
   profile?: MapProfile;
   /**
-   * `"globe"` draws the map as a sphere. Omit, or pass `"mercator"`, for the flat map.
+   * `"globe"` (the default) draws the map as a sphere; `"mercator"` draws the flat map.
+   * MapLibre's globe flattens into Mercator as it zooms in, so a city view reads as a flat map.
    * A city centre without a zoom still frames the city, not the planet.
    */
   projection?: Projection;
@@ -59,6 +61,9 @@ export interface UnmapControlsOptions {
   /** Corner to mount the controls in. Defaults to `top-right`. */
   position?: ControlPosition;
 }
+
+/** The projection a map is drawn in when the caller does not say. */
+const DEFAULT_PROJECTION: Projection = "globe";
 
 /** Where controls land when the caller does not say. MapLibre's own default corner. */
 const DEFAULT_CONTROL_POSITION: ControlPosition = "top-right";
@@ -139,15 +144,27 @@ export function createMap(opts: UnmapMapOptions): MaplibreMap {
     // Spread last so a caller can override any default above, including the attribution.
     ...opts.maplibre,
   });
-  if (opts.projection) {
-    // MapLibre 6 has no constructor `projection` option, and calling `setProjection` before
-    // the style exists throws. `style.load` can fire during construction when the style is
-    // cached, so also apply on `load`, which is always after this function returns.
-    const type = opts.projection;
-    const apply = () => map.setProjection({ type });
-    map.once("style.load", apply);
-    map.once("load", apply);
-  }
+  // MapLibre 6 has no constructor `projection` option, and calling `setProjection` before the
+  // style exists throws, so the projection is applied on `style.load`. Applied even for the
+  // default: MapLibre's own default is Mercator, and the style document carries none.
+  //
+  // MapLibre 6 also keeps the projection on the style document, so `map.setStyle` (diffed or
+  // not) to a style that names none draws Mercator. Carry what the map showed before the swap
+  // onto the new style, as the registry's map-context does: the projection this map was created
+  // with, or one the caller set since. A style's own projection is carried the same way, onto
+  // later styles, overriding theirs; a caller who wants the new style's projection sets it in
+  // their own `style.load` listener, which runs after this one.
+  let carried: ProjectionSpecification = { type: opts.projection ?? DEFAULT_PROJECTION };
+  const swapStyle = map.setStyle.bind(map);
+  map.setStyle = (style, options) => {
+    // Undefined while a style is still loading: keep what the last one carried.
+    const shown = map.getProjection();
+    if (shown) carried = shown;
+    return swapStyle(style, options);
+  };
+  map.on("style.load", () => map.setProjection(carried));
+  // A style that loaded inside the constructor fired its `style.load` before the listener existed.
+  if (map.getStyle()) map.setProjection(carried);
 
   // Skip only when the caller turned attribution off entirely; there is nothing to collapse.
   if (opts.maplibre?.attributionControl !== false) collapseAttribution(map);

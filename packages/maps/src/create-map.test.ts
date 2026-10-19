@@ -37,6 +37,11 @@ let attribAtConstruction: string[] | null = null;
 let added: [unknown, string | undefined][];
 /** Every `setProjection` call of the most recent map. */
 let projections: unknown[];
+/**
+ * The projection on the most recent map's style document, as MapLibre 6 keeps it: `setProjection`
+ * writes it, and `setStyle` replaces the document, so until the new style loads there is none.
+ */
+let styleProjection: unknown;
 const NavigationControlMock = vi.fn(function (options?: Record<string, unknown>) {
   return { kind: "navigation", options };
 });
@@ -49,6 +54,7 @@ const MapMock = vi.fn(function (_options: Record<string, unknown>) {
   ]);
     added = [];
     projections = [];
+    styleProjection = undefined;
     listeners = new Map();
   return {
     getContainer: () => ({
@@ -61,7 +67,17 @@ const MapMock = vi.fn(function (_options: Record<string, unknown>) {
     },
     off: (e: string, cb: () => void) => listeners.get(e)?.delete(cb),
     addControl: (control: unknown, position?: string) => added.push([control, position]),
-    setProjection: (projection: unknown) => projections.push(projection),
+    setProjection: (projection: unknown) => {
+      projections.push(projection);
+      styleProjection = projection;
+    },
+    getProjection: () => styleProjection,
+    // No style has loaded inside the constructor; `style.load` is fired by the test.
+    getStyle: () => undefined,
+    setStyle(this: unknown) {
+      styleProjection = undefined;
+      return this;
+    },
   };
 });
 vi.mock("maplibre-gl", () => ({
@@ -180,19 +196,47 @@ describe("createMap", () => {
     expect(optionsFromLastCall().style).toBe("https://g/styles/outdoor.json?key=k");
   });
 
-  it("forwards projection to MapLibre and omits it otherwise", () => {
-    // MapLibre 6 has no constructor `projection` option; the style document would also
-    // overwrite one. `setProjection` after load is what actually draws a globe.
+  it("draws the globe by default and forwards an explicit projection", () => {
+    // MapLibre 6 has no constructor `projection` option, and its own default is Mercator; the
+    // style document would also overwrite one. `setProjection` on `style.load` is what draws a globe.
+    const fire = (e: string) => [...(listeners.get(e) ?? [])].forEach((cb) => cb());
     createMap({ key: "k", container: "map" });
-    expect(projections).toEqual([]);
     expect("projection" in optionsFromLastCall()).toBe(false);
+    fire("style.load");
+    expect(projections).toEqual([{ type: "globe" }]);
 
     createMap({ key: "k", container: "map", projection: "globe" });
-    expect(projections.length).toBeGreaterThan(0);
-    expect(projections.every((p) => JSON.stringify(p) === JSON.stringify({ type: "globe" }))).toBe(true);
+    fire("style.load");
+    expect(projections).toEqual([{ type: "globe" }]);
 
     createMap({ key: "k", container: "map", projection: "mercator" });
-    expect(projections.every((p) => JSON.stringify(p) === JSON.stringify({ type: "mercator" }))).toBe(true);
+    fire("style.load");
+    expect(projections).toEqual([{ type: "mercator" }]);
+  });
+
+  // MapLibre 6 keeps the projection on the style document, so a raw `setStyle` to a style that
+  // names none arrives flat. Checked against a real MapLibre 6.13 map: without the carry, both a
+  // diffed and a `{ diff: false }` swap came back Mercator.
+  it("carries the projection the map showed across a style swap", () => {
+    const fire = (e: string) => [...(listeners.get(e) ?? [])].forEach((cb) => cb());
+    const map = createMap({ key: "k", container: "map" });
+    fire("style.load");
+    map.setStyle("https://g/styles/muted.json?key=k");
+    expect(map.getProjection()).toBeUndefined();
+    fire("style.load");
+    expect(map.getProjection()).toEqual({ type: "globe" });
+
+    // One the caller set on the map themselves crosses the swap too, not the creation option.
+    map.setProjection({ type: "mercator" });
+    map.setStyle("https://g/styles/outdoor.json?key=k", { diff: false });
+    fire("style.load");
+    expect(map.getProjection()).toEqual({ type: "mercator" });
+
+    // A second swap before the first has loaded keeps what the last loaded style showed.
+    map.setStyle("https://g/styles/base.json?key=k");
+    map.setStyle("https://g/styles/muted.json?key=k");
+    fire("style.load");
+    expect(map.getProjection()).toEqual({ type: "mercator" });
   });
 
   // Navigation is on by default: a map with no zoom affordance is a map a visitor with a
