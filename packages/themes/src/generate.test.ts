@@ -55,6 +55,22 @@ describe("generateTheme", () => {
     expect(near(hue(light.flavor.park_a!), hue(seeds.nature)), "park hue").toBe(true);
   });
 
+  it("the water seed reaches the water of every style, whatever ramp the style draws it from", () => {
+    // A tan land and a green nature, so a water fill drawn from the land or nature ramp (blush,
+    // sunset, tropic, canopy, pastel and blueprint all did) shows up as the wrong hue.
+    const image: ThemeSeeds = { land: "#F7D8AC", water: "#0179B5", nature: "#329658", accent: "#D43532" };
+    const hue = (hex: string) => hexToOklch(hex).h;
+    const near = (a: number, b: number) => Math.min(Math.abs(a - b), 360 - Math.abs(a - b)) < 25;
+    for (const base of THEME_BASES) {
+      for (const mode of ["light", "dark"] as const) {
+        const water = resolveTheme(generateTheme(base, image), mode).flavor.water;
+        // Near-black and near-white steps carry too little chroma for a hue to mean anything.
+        if (hexToOklch(water).c < 0.02) continue;
+        expect(near(hue(water), hue(image.water)), `${base}-${mode} water ${water}`).toBe(true);
+      }
+    }
+  });
+
   it("keeps lightness ladders: dark mode stays dark, light stays light", () => {
     const doc = generateTheme("base", seeds);
     const lightBg = hexToOklch(resolveTheme(doc, "light").flavor.background!).l;

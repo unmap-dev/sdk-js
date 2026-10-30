@@ -142,8 +142,8 @@ function diffRecipe(
  * seed can carry them to any hue, plus `blush`'s `rose`, `orchid`'s `lilac`, the cream `linen` of
  * `tropic` and `sunset`, and `sunset`'s `indigo`. `nature` recolours `verdant`, `sunset`'s `peach`
  * and the teal `aqua` of `orchid` and `lagoon`. `water` recolours the wave, sky, azure and mist ramps (`mist` is
- * greyscale in stock `muted` and takes the water seed's hue outright), `nature` the verdant
- * ramp. Warm landcover (sandstone), the highway ramps (ember, coral, amber), POI accents and white road fills stay stock: they
+ * greyscale in stock `muted` and takes the water seed's hue outright), and the water fill of
+ * every style whatever ramp it is drawn from, `nature` the verdant ramp. Warm landcover (sandstone), the highway ramps (ember, coral, amber), POI accents and white road fills stay stock: they
  * are tuned relationships, not identity. `accent` styles the marker and route overlays only —
  * it never enters the basemap, same rule as the brand magenta.
  */
@@ -175,10 +175,21 @@ export function generateTheme(base: ThemeBase, seeds: ThemeSeeds): ThemeDoc {
     peach: reRamp(STOCK_RAMPS.peach, seeds.nature, CHROMA_CAP),
   };
   const generated = buildRecipes(ramps);
+  // Several styles draw their water from a land, nature or highway ramp (`blueprint`, `canopy`
+  // and `pastel` from `cobalt`, `blush` from `ember` and `rose`, `sunset` from `indigo`, `tropic`
+  // from `aqua`), which the mapping above recolours with the wrong seed or not at all. So build
+  // once more with every ramp in the water seed's hue and take only the water fill from it: each
+  // style keeps the step it chose, and the water seed reaches every style's water. Styles already
+  // on a water ramp get exactly what they got before.
+  const watered = buildRecipes(
+    Object.fromEntries(
+      Object.entries(STOCK_RAMPS).map(([name, ramp]) => [name, reRamp(ramp, seeds.water, CHROMA_CAP)]),
+    ) as unknown as RampSet,
+  );
 
   const doc: ThemeDoc = { v: 1, base, seeds: { ...seeds } };
   for (const mode of MODES) {
-    const recipe = enforceLabelContrast(generated[base][mode]);
+    const recipe = enforceLabelContrast({ ...generated[base][mode], water: watered[base][mode].water });
     const basemap = diffRecipe(RECIPES[base][mode], recipe);
     const half: NonNullable<ThemeDoc["light"]> = {};
     if (basemap) half.basemap = basemap;
