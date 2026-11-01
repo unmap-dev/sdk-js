@@ -47,6 +47,28 @@ Also exported:
 - `maplibregl`, the `maplibre-gl` module, for `new maplibregl.Marker()` and friends without a
   second import.
 
+## Search control
+
+`@unmap/maps/geocoder` answers [`@maplibre/maplibre-gl-geocoder`](https://maplibre.org/maplibre-gl-geocoder/),
+MapLibre's search control, from the unmap gateway. Install the plugin alongside, since it is an
+optional peer dependency.
+
+```ts
+import { createGeocoder } from "@unmap/maps/geocoder";
+import "@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css";
+
+map.addControl(createGeocoder({ key: "um_live_..." }), "top-left");
+```
+
+`createGeocoder` shows results while typing and fills the input with the picked result's full
+line; any other plugin option passes through. Results are Mapbox-style Carmen features, with the
+full unmap result on `properties.unmap`. `unmapGeocoderApi({ key })` is the bare `geocoderApi` for
+`new MaplibreGeocoder(api, options)`, and `toCarmenFeature(result)` converts one result. The plugin's
+default `render` and `popupRender` put result text into HTML unescaped, and place names are editable
+open data, so `createGeocoder` replaces them with the escaping `renderResult` and `renderPopup`;
+pass those yourself when you build the plugin around `unmapGeocoderApi`. A map that
+never imports this entry pulls in neither the plugin nor `@unmap/geocoding`.
+
 ## Stylesheet
 
 MapLibre's CSS is needed for controls, attribution, markers, and popups. Import
