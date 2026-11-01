@@ -1,5 +1,40 @@
 # @unmap/sdk
 
+## 0.22.1
+
+### Patch Changes
+
+- Updated dependencies [5424504]
+  - @unmap/maps@0.22.1
+  - @unmap/core@0.22.1
+  - @unmap/geocoding@0.22.1
+  - @unmap/routing@0.22.1
+  - @unmap/elevation@0.22.1
+
+## 0.22.0
+
+### Minor Changes
+
+- caa3b8d: The map is a globe by default. `createMap` and `new Unmap({ container })` now draw
+  `projection: "globe"` when no projection is given, where they used to leave MapLibre's flat
+  Mercator. Zoomed out the map is a sphere; zoomed in, MapLibre's globe flattens into Mercator, so a
+  city view looks as it did. Pass `projection: "mercator"` for the flat map at every zoom.
+  `@unmap/react`, `@unmap/next`, `@unmap/vue` and `@unmap/nuxt` follow, since they create the map
+  through `createMap`.
+
+### Patch Changes
+
+- Updated dependencies [49e6c6c]
+- Updated dependencies [756ad34]
+- Updated dependencies [caa3b8d]
+- Updated dependencies [9a392b0]
+- Updated dependencies [31cbbbf]
+  - @unmap/maps@0.22.0
+  - @unmap/geocoding@0.22.0
+  - @unmap/core@0.22.0
+  - @unmap/routing@0.22.0
+  - @unmap/elevation@0.22.0
+
 ## 0.21.0
 
 ### Minor Changes

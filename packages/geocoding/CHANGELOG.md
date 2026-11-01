@@ -1,5 +1,18 @@
 # @unmap/geocoding
 
+## 0.22.1
+
+### Patch Changes
+
+- @unmap/core@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- 756ad34: `inCanadianServiceArea` now follows the Statistics Canada boundary on the 49th parallel, the 141st meridian and the New Brunswick due-north line. Downtown Blaine, Sumas, Sweetgrass, Roosville, Portal and Noyes are outside it; before, they were inside. A strip of Yukon beside the 141st meridian that was outside is now inside.
+  - @unmap/core@0.22.0
+
 ## 0.21.0
 
 ### Patch Changes

@@ -1,7 +1,7 @@
 {
   "name": "@unmap/optimize-schema",
   "private": true,
-  "version": "0.21.0",
+  "version": "0.22.1",
   "description": "Unmap Optimize request contract: GMPRO-compatible types, protobuf-JSON helpers, the field-status table, the request validator and a JSON Schema emitter",
   "license": "MIT",
   "type": "module",

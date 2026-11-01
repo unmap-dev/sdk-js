@@ -1,5 +1,52 @@
 # @unmap/maps
 
+## 0.22.1
+
+### Patch Changes
+
+- 5424504: `@unmap/maps/geocoder` no longer fails every search in a control created with `types`. The plugin
+  splits `types`, `countries` and `language` into arrays before it calls the `geocoderApi`, though its
+  type declarations say strings, and the adapter called `.split` on the array. Both shapes are read
+  now, and `language` sends its first tag as `lang`. A named result (a POI, or a building with a name
+  of its own) now reads its street and city in `place_name`: "Dickens Pub, 1000 9 Avenue SW, Calgary,
+  AB" rather than "Dickens Pub, AB".
+  - @unmap/core@0.22.1
+  - @unmap/geocoding@0.22.1
+
+## 0.22.0
+
+### Minor Changes
+
+- caa3b8d: The map is a globe by default. `createMap` and `new Unmap({ container })` now draw
+  `projection: "globe"` when no projection is given, where they used to leave MapLibre's flat
+  Mercator. Zoomed out the map is a sphere; zoomed in, MapLibre's globe flattens into Mercator, so a
+  city view looks as it did. Pass `projection: "mercator"` for the flat map at every zoom.
+  `@unmap/react`, `@unmap/next`, `@unmap/vue` and `@unmap/nuxt` follow, since they create the map
+  through `createMap`.
+- 31cbbbf: `@unmap/maps/geocoder` puts unmap search on `@maplibre/maplibre-gl-geocoder`, MapLibre's own search
+  control. `createGeocoder({ key })` returns the control for `map.addControl`, showing results while
+  typing; `unmapGeocoderApi({ key })` is the bare `geocoderApi` for configuring the plugin yourself,
+  and `toCarmenFeature(result)` converts one result. Results are Mapbox-style Carmen features
+  (`place_name`, `place_type`, `text`, `address`, `center`, `context`) with the full unmap result on
+  `properties.unmap`. The plugin is an optional peer dependency, and the main `@unmap/maps` entry is
+  unchanged, so a map that never imports `@unmap/maps/geocoder` pulls in neither the plugin nor
+  `@unmap/geocoding`.
+
+### Patch Changes
+
+- 49e6c6c: `createMap` now collapses the compact attribution as soon as the style brings its first credit,
+  instead of on `load`. MapLibre compacts the control only once it has text, which is after
+  construction, so the full credit line showed over the map (a third of a phone screen) for as
+  long as the tiles took to load. Once collapsed it is left alone, so a reader who opens it keeps
+  it open.
+- 9a392b0: The projection now survives `map.setStyle`. MapLibre 6 keeps the projection on the style
+  document, so swapping the style on a map from `createMap` or `new Unmap({ container })` drew the
+  new style flat, globe or not. `createMap` now carries whatever projection the map showed before
+  the swap onto the new style, including one set with `map.setProjection`.
+- Updated dependencies [756ad34]
+  - @unmap/geocoding@0.22.0
+  - @unmap/core@0.22.0
+
 ## 0.21.0
 
 ### Patch Changes

@@ -86,10 +86,17 @@ export function toCarmenFeature(result: GeocodeResult, language?: string): Unmap
   const placeType = TYPE_FOR_LAYER[result.layer] ?? result.layer;
   const isAddress = result.layer === "address" && !!address.housenumber && !!address.street;
   const ownCity = !!address.city && address.city === result.name;
-  // `name` already reads "1000 9 AV SW, Calgary" for an address; the province completes it the
-  // way Carmen's `place_name` does. A region names itself, and so does a city's own row.
+  // `name` already reads "1000 9 AV SW, Calgary" for a civic address; the province completes it
+  // the way Carmen's `place_name` does. A named row ("Dickens Pub", a POI or a named building) says
+  // where it is with its street and city. A region names itself, and so does a city's own row.
   const province = result.layer === "region" || !address.region ? "" : address.region;
-  const placeName = [result.name, province].filter(Boolean).join(", ");
+  const streetLine = [address.housenumber, address.street].filter(Boolean).join(" ");
+  const civicName = !!address.housenumber && result.name.startsWith(address.housenumber);
+  const where =
+    civicName || result.layer === "locality" || result.layer === "region"
+      ? []
+      : [streetLine, address.city].filter((part) => part && !result.name.includes(part));
+  const placeName = [result.name, ...where, province].filter(Boolean).join(", ");
 
   return {
     id: `${result.layer}.${result.id}`,
@@ -112,6 +119,22 @@ export function toCarmenFeature(result: GeocodeResult, language?: string): Unmap
     ],
   };
 }
+
+/**
+ * The plugin's `types`, `countries` and `language` as a list.
+ *
+ * Its `.d.ts` declares them as comma-separated strings, but `_getConfigForRequest` splits every
+ * one of them into an array before calling the `geocoderApi` (plugin 1.9.4), so a caller passing
+ * `types: "address,place"` reaches this adapter as `["address", "place"]`. Both shapes are read, so
+ * the adapter also works for a caller that builds the config by hand.
+ */
+const list = (value: unknown): string[] =>
+  (Array.isArray(value) ? value : typeof value === "string" ? value.split(/[\s,]+/) : [])
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+
+/** The first language tag, as the gateway's `lang` wants it. */
+const languageOf = (config: MaplibreGeocoderApiConfig): string | undefined => list(config.language)[0];
 
 const collection = (features: UnmapCarmenFeature[]): MaplibreGeocoderFeatureResults => ({
   type: "FeatureCollection",
@@ -143,8 +166,9 @@ export function unmapGeocoderApi(opts: UnmapGeocoderApiOptions): MaplibreGeocode
       const q = typeof config.query === "string" ? config.query.trim() : "";
       if (!q) return collection([]);
       let layers: string | undefined;
-      if (config.types) {
-        const mapped = [...new Set(config.types.split(",").map((t) => LAYER_FOR_TYPE[t.trim()]).filter(Boolean))];
+      const types = list(config.types);
+      if (types.length) {
+        const mapped = [...new Set(types.map((t) => LAYER_FOR_TYPE[t]).filter(Boolean))];
         // Only types unmap has no layer for (`postcode`, `country`): nothing can match them, and
         // sending no `layers` would answer as if the caller had not filtered at all.
         if (!mapped.length) return collection([]);
@@ -153,8 +177,9 @@ export function unmapGeocoderApi(opts: UnmapGeocoderApiOptions): MaplibreGeocode
       const limit = config.limit ?? 5;
       const bbox = config.bbox?.length === 4 ? config.bbox : undefined;
       const focus = config.proximity?.length === 2 ? ([config.proximity[0], config.proximity[1]] as [number, number]) : undefined;
+      const language = languageOf(config);
       const search = {
-        lang: config.language,
+        lang: language,
         layers,
         focus,
         // `/geocode/autocomplete` has no `bbox`, so a box is applied here, over a wider pool.
@@ -162,15 +187,16 @@ export function unmapGeocoderApi(opts: UnmapGeocoderApiOptions): MaplibreGeocode
         ...(bbox && mode === "search" ? { bbox: bbox as [number, number, number, number] } : {}),
       };
       const results = mode === "search" ? await client.search(q, search) : await client.autocomplete(q, search);
-      const features = results.map((r) => toCarmenFeature(r, config.language));
+      const features = results.map((r) => toCarmenFeature(r, language));
       return collection((bbox ? features.filter((f) => inBbox(bbox, f)) : features).slice(0, limit));
     },
 
     async reverseGeocode(config: MaplibreGeocoderApiConfig) {
       if (!Array.isArray(config.query) || config.query.length !== 2) return collection([]);
       const [lng, lat] = config.query as [number, number];
-      const results = await client.reverse(lng, lat, { limit: config.limit ?? 1, lang: config.language });
-      return collection(results.map((r) => toCarmenFeature(r, config.language)));
+      const language = languageOf(config);
+      const results = await client.reverse(lng, lat, { limit: config.limit ?? 1, lang: language });
+      return collection(results.map((r) => toCarmenFeature(r, language)));
     },
   };
 }

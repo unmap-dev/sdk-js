@@ -1,5 +1,13 @@
 # @unmap/themes
 
+## 0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- 7bab9ab: `generateTheme` now applies the water seed to the water of every style. `blueprint`, `blush`, `canopy`, `tropic`, `sunset` and `pastel` drew their water from a land, nature or highway ramp, so a water seed left it unchanged or tinted it with the land or nature colour. The other eight styles generate exactly what they did before.
+
 ## 0.21.0
 
 ## 0.20.0

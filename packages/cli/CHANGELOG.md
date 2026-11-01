@@ -1,5 +1,21 @@
 # @unmap/cli
 
+## 0.22.1
+
+### Patch Changes
+
+- @unmap/core@0.22.1
+- @unmap/geocoding@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- f44f1ab: `unmap add api-inspector` installs the new API inspector, a development tool that lists every unmap API call a page makes with the SDK line and curl behind it, and `unmap add api-calls` its framework-free recorder.
+- Updated dependencies [756ad34]
+  - @unmap/geocoding@0.22.0
+  - @unmap/core@0.22.0
+
 ## 0.21.0
 
 ### Patch Changes

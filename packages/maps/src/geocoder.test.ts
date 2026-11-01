@@ -61,6 +61,21 @@ describe("toCarmenFeature", () => {
     expect(f.id).toBe("address.20335012");
   });
 
+  it("says where a named place is with its street and city", () => {
+    const pub: GeocodeResult = {
+      id: "7",
+      name: "Dickens Pub",
+      layer: "address",
+      lng: -114.085,
+      lat: 51.0447,
+      address: { housenumber: "1000", street: "9 Avenue SW", city: "Calgary", region: "AB" },
+    };
+    const f = toCarmenFeature(pub);
+    expect(f.place_name).toBe("Dickens Pub, 1000 9 Avenue SW, Calgary, AB");
+    expect(f.address).toBe("1000");
+    expect(f.text).toBe("9 Avenue SW");
+  });
+
   it("carries postcode, city, province and country as Carmen context", () => {
     expect(toCarmenFeature(calgaryAddress).context).toEqual([
       { id: "postcode.T2P 2Y6", text: "T2P 2Y6" },
@@ -105,6 +120,24 @@ describe("unmapGeocoderApi", () => {
     expect(url.searchParams.get("lang")).toBe("fr");
     expect(url.searchParams.get("layers")).toBe("address,locality");
     expect(url.searchParams.get("focus")).toMatch(/^-114\.07,51\.05/);
+  });
+
+  it("reads types and language as the arrays the plugin really sends", async () => {
+    // MaplibreGeocoder splits `types`, `countries` and `language` before calling the API, though
+    // its .d.ts declares strings; 0.22.0 called `.split` on the array and every typed box failed.
+    const api = unmapGeocoderApi({ key: "um_test_x", fetch: stubFetch([calgaryAddress]) });
+    const config = { query: "1000 9 Ave SW", types: ["address", "place", "neighborhood"], language: ["fr", "en"] };
+    const res = await api.forwardGeocode(config as unknown as Parameters<typeof api.forwardGeocode>[0]);
+    expect(res.features).toHaveLength(1);
+    expect(calls[0]!.searchParams.get("layers")).toBe("address,locality");
+    expect(calls[0]!.searchParams.get("lang")).toBe("fr");
+    expect(res.features[0]?.language).toBe("fr");
+  });
+
+  it("reads an array language on reverse too", async () => {
+    const api = unmapGeocoderApi({ key: "um_test_x", fetch: stubFetch([calgaryAddress]) });
+    await api.reverseGeocode!({ query: [-114.0849, 51.0446], language: ["en"] } as unknown as Parameters<typeof api.forwardGeocode>[0]);
+    expect(calls[0]!.searchParams.get("lang")).toBe("en");
   });
 
   it("uses full-text search in search mode", async () => {
