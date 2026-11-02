@@ -59,6 +59,7 @@ const STYLE_SLOTS: readonly (ThemeBase | null)[] = [
   "pastel",
   "atlas",
   "swiss",
+  "winter",
 ];
 
 const STYLE_BITS = 5n;

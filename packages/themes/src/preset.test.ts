@@ -32,7 +32,7 @@ describe("short presets", () => {
   it("encodes the living styles as three-character codes in lineup order", async () => {
     const codes = await Promise.all(THEME_BASES.map((base) => encodeTheme(STYLE_THEMES[base])));
     // u03 is a tombstone: the slot index is bit-packed, so it is never reused.
-    expect(codes).toEqual(["u00", "u01", "u02", "u04", "u05", "u06", "u07", "u08", "u09", "u0A", "u0B", "u0C", "u0D", "u0E"]);
+    expect(codes).toEqual(["u00", "u01", "u02", "u04", "u05", "u06", "u07", "u08", "u09", "u0A", "u0B", "u0C", "u0D", "u0E", "u0F"]);
     for (const [i, base] of THEME_BASES.entries()) {
       expect(await decodeTheme(codes[i]!)).toEqual(STYLE_THEMES[base]);
     }
@@ -188,6 +188,7 @@ describe("short presets", () => {
       pastel: "u0C",
       atlas: "u0D",
       swiss: "u0E",
+      winter: "u0F",
       processInk: "u0W",
       boreal: "u4e",
       prairie: "u8m",

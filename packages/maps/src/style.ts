@@ -18,6 +18,7 @@ export const STYLE_NAMES = [
   "pastel",
   "atlas",
   "swiss",
+  "winter",
 ] as const;
 export type StyleName = (typeof STYLE_NAMES)[number];
 

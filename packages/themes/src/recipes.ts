@@ -2117,6 +2117,173 @@ export function buildRecipes(
     },
   };
 
+  /**
+   * `winter` / `light`. Snow country: the land is near-white `ink`, so the winter landscape reads
+   * as snow rather than as the absence of data, water is icy `azure`, and woods are a spruce
+   * `jade` that stands dark against the snow the way a forest does from a chairlift. Roads are
+   * white with cool casings and the highway is a cold `cobalt`, so nothing warm competes with the
+   * ski overlay, whose difficulty colours (green, blue, black, orange) are the content here.
+   * Labels keep `outdoor`'s contrast-safe `ink` steps.
+   */
+  const WINTER_LIGHT: Recipe = {
+    background: r.ink[50],
+    earth: r.ink[25],
+    water: r.azure[300],
+    parkA: r.jade[200],
+    parkB: r.jade[300],
+    woodA: r.jade[400],
+    woodB: r.jade[500],
+    scrubA: r.ink[100],
+    scrubB: r.ink[200],
+    sand: r.ink[100],
+    beach: r.ink[100],
+    glacier: r.ink[25],
+    institutional: r.ink[50],
+    pedestrian: r.ink[50],
+    aerodrome: r.ink[100],
+    runway: r.ink[300],
+    pier: r.ink[300],
+    buildings: r.ink[200],
+    railway: r.ink[500],
+    boundaries: r.cobalt[500],
+    roads: {
+      other: "#FFFFFF",
+      otherCasing: r.ink[200],
+      minor: "#FFFFFF",
+      minorCasing: r.ink[200],
+      service: "#FFFFFF",
+      serviceCasing: r.ink[200],
+      major: "#FFFFFF",
+      majorCasing: r.ink[300],
+      highway: r.cobalt[400],
+      highwayCasing: r.cobalt[600],
+      link: r.cobalt[300],
+      linkCasing: r.cobalt[500],
+    },
+    tunnelFill: r.ink[100],
+    tunnelCasing: r.ink[200],
+    bridgeCasing: r.ink[400],
+    labels: {
+      city: r.ink[1000],
+      cityHalo: r.ink[25],
+      state: r.ink[700],
+      stateHalo: r.ink[25],
+      country: r.ink[700],
+      subplace: r.ink[700],
+      subplaceHalo: r.ink[25],
+      address: r.ink[700],
+      addressHalo: r.ink[25],
+      roadMinor: r.ink[700],
+      roadMinorHalo: r.ink[25],
+      roadMajor: r.ink[800],
+      roadMajorHalo: r.ink[25],
+      ocean: r.azure[800],
+    },
+
+    pois: {
+      blue: r.azure[700],
+      green: r.jade[800],
+      lapis: r.cobalt[700],
+      pink: r.rose[700],
+      red: r.rose[800],
+      slategray: r.ink[700],
+      tangerine: r.sandstone[500],
+      turquoise: r.wave[700],
+    },
+    landcover: {
+      // Snow covers the open ground, so grass, barren land and fields all go to the snow tones
+      // and only the forest keeps colour.
+      grassland: r.ink[100],
+      barren: r.ink[100],
+      urban_area: r.ink[100],
+      farmland: r.ink[50],
+      glacier: r.ink[25],
+      scrub: r.ink[200],
+      forest: r.jade[500],
+    },
+  };
+
+  /**
+   * `winter` / `dark`. Night skiing: `outdoor`'s dark `ink` ground, water a step darker still,
+   * spruce lifted to the mid `jade` steps so the forest stays visible against the dark snow, and
+   * the cobalt highway kept.
+   */
+  const WINTER_DARK: Recipe = {
+    background: r.ink[1000],
+    earth: r.ink[950],
+    water: r.azure[980],
+    parkA: r.jade[850],
+    parkB: r.jade[800],
+    woodA: r.jade[800],
+    woodB: r.jade[700],
+    scrubA: r.ink[900],
+    scrubB: r.ink[850],
+    sand: r.ink[850],
+    beach: r.ink[850],
+    glacier: r.ink[800],
+    institutional: r.ink[1000],
+    pedestrian: r.ink[950],
+    aerodrome: r.ink[950],
+    runway: r.ink[850],
+    pier: r.ink[850],
+    buildings: r.ink[900],
+    railway: r.ink[700],
+    boundaries: r.cobalt[400],
+    roads: {
+      other: r.ink[900],
+      otherCasing: r.ink[1000],
+      minor: r.ink[850],
+      minorCasing: r.ink[1000],
+      service: r.ink[900],
+      serviceCasing: r.ink[1000],
+      major: r.ink[700],
+      majorCasing: r.ink[1000],
+      highway: r.cobalt[600],
+      highwayCasing: r.ink[1000],
+      link: r.cobalt[700],
+      linkCasing: r.ink[1000],
+    },
+    tunnelFill: r.ink[900],
+    tunnelCasing: r.ink[1000],
+    bridgeCasing: r.ink[1000],
+    labels: {
+      city: r.ink[100],
+      cityHalo: r.ink[1000],
+      state: r.ink[500],
+      stateHalo: r.ink[1000],
+      country: r.ink[500],
+      subplace: r.ink[500],
+      subplaceHalo: r.ink[1000],
+      address: r.ink[500],
+      addressHalo: r.ink[1000],
+      roadMinor: r.ink[500],
+      roadMinorHalo: r.ink[1000],
+      roadMajor: r.ink[400],
+      roadMajorHalo: r.ink[1000],
+      ocean: r.azure[400],
+    },
+
+    pois: {
+      blue: r.azure[300],
+      green: r.jade[300],
+      lapis: r.cobalt[300],
+      pink: r.rose[300],
+      red: r.rose[400],
+      slategray: r.ink[500],
+      tangerine: r.sandstone[300],
+      turquoise: r.wave[400],
+    },
+    landcover: {
+      grassland: r.ink[900],
+      barren: r.ink[900],
+      urban_area: r.ink[950],
+      farmland: r.ink[900],
+      glacier: r.ink[800],
+      scrub: r.ink[850],
+      forest: r.jade[700],
+    },
+  };
+
   // Adapt Bay Atlas's two traditional maps to the Protomaps schema. Shared recipes keep
   // custom themes working; the gateway supplies their typography and relief treatments.
   const traditional = (swiss: boolean, mode: ThemeMode): Recipe => {
@@ -2199,6 +2366,7 @@ export function buildRecipes(
     pastel: { light: PASTEL_LIGHT, dark: PASTEL_DARK },
     atlas: { light: traditional(false, "light"), dark: traditional(false, "dark") },
     swiss: { light: traditional(true, "light"), dark: traditional(true, "dark") },
+    winter: { light: WINTER_LIGHT, dark: WINTER_DARK },
   };
 }
 

@@ -25,4 +25,5 @@ export const STYLE_THEMES: Record<ThemeBase, ThemeDoc> = {
   pastel: { v: 1, name: "pastel", base: "pastel" },
   atlas: { v: 1, name: "atlas", base: "atlas" },
   swiss: { v: 1, name: "swiss", base: "swiss" },
+  winter: { v: 1, name: "winter", base: "winter" },
 };

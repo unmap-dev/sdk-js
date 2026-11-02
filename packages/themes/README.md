@@ -31,7 +31,7 @@ const doc = await decodeTheme(code)                 // validated ThemeDoc, or th
 
 ## What is in a theme
 
-- `base` picks the style: `base`, `muted`, `outdoor`, `blueprint`, `blush`, `orchid`, `canopy`, `lagoon`, `tropic`, `sunset`, `bold`, `pastel`, `atlas` or `swiss`. Each of `light` and `dark` carries
+- `base` picks the style: `base`, `muted`, `outdoor`, `blueprint`, `blush`, `orchid`, `canopy`, `lagoon`, `tropic`, `sunset`, `bold`, `pastel`, `atlas`, `swiss` or `winter`. Each of `light` and `dark` carries
   sparse overrides on that style, so a theme with no overrides renders exactly like the style
   itself at `/styles/<style>.json`.
 - `basemap` overrides are colours on the style's recipe (land, water, vegetation, roads, labels,

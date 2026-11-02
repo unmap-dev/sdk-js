@@ -30,6 +30,7 @@ export const THEME_BASES = [
   "pastel",
   "atlas",
   "swiss",
+  "winter",
 ] as const;
 export type ThemeBase = (typeof THEME_BASES)[number];
 

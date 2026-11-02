@@ -29,7 +29,7 @@ export interface LayerArchive {
  * The capability a gated layer's tiles need. These are capability ids (`legalLand`), not the
  * `addon-*` SKUs a customer buys (`addon-legal-land`).
  */
-export type LayerCapability = "legalLand" | "energy" | "agriculture" | "remote" | "mining";
+export type LayerCapability = "legalLand" | "energy" | "agriculture" | "remote" | "mining" | "ski";
 
 /**
  * One catalog layer.
@@ -41,7 +41,7 @@ export type LayerCapability = "legalLand" | "energy" | "agriculture" | "remote" 
 export interface Layer {
   id: string;
   display_name: { en: string; fr: string };
-  namespace?: "core" | "survey" | "energy" | "agriculture" | "remote" | "mining";
+  namespace?: "core" | "survey" | "energy" | "agriculture" | "remote" | "mining" | "ski";
   /** ISO 3166 codes where coverage is VERIFIED. `coverage` carries the prose, including gaps. */
   jurisdiction?: string[];
   source?: string;
