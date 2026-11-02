@@ -37,6 +37,10 @@ export interface UnmapMapOptions {
   overlays?: readonly string[];
   /** Composition preset. Not a style. Explicit overlays replace the profile list. */
   profile?: MapProfile;
+  /** Draw the style on 3D terrain (`?terrain=on`). Any style, flat ones included. */
+  terrain?: boolean;
+  /** Vertical exaggeration for `terrain`, 0.1 to 5; the gateway's default is 1. */
+  exaggeration?: number;
   /**
    * `"globe"` (the default) draws the map as a sphere; `"mercator"` draws the flat map.
    * MapLibre's globe flattens into Mercator as it zooms in, so a city view reads as a flat map.

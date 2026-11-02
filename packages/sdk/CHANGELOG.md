@@ -1,5 +1,22 @@
 # @unmap/sdk
 
+## 0.23.0
+
+### Minor Changes
+
+- 2504d8c: `Layer.namespace` and `LayerCapability` include `ski`, for the Ski add-on's catalog layer.
+- 78bb54f: `terrain: true` (and `exaggeration`, 0.1 to 5) on `styleUrl`, `unmapStyle`, `createMap` and `new Unmap()` asks the gateway for the style on 3D terrain (`?terrain=on`). Works on every style.
+
+### Patch Changes
+
+- Updated dependencies [78bb54f]
+- Updated dependencies [6d8deae]
+  - @unmap/core@0.23.0
+  - @unmap/maps@0.23.0
+  - @unmap/elevation@0.23.0
+  - @unmap/geocoding@0.23.0
+  - @unmap/routing@0.23.0
+
 ## 0.22.1
 
 ### Patch Changes

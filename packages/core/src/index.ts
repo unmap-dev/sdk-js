@@ -38,7 +38,7 @@ export function tileUrl(key: string, opts: { gateway?: string } = {}): string {
 export const MAP_PROFILES = ["energy", "agriculture", "remote", "mining"] as const;
 export type MapProfile = (typeof MAP_PROFILES)[number];
 
-/** MapLibre style URL for a named style (`base`, `muted`, `outdoor`, `blueprint`, `blush`, `orchid`, `canopy`, `lagoon`, `tropic`, `sunset`, `bold`, `pastel`, `atlas`, `swiss`). */
+/** MapLibre style URL for a named style (`base`, `muted`, `outdoor`, `blueprint`, `blush`, `orchid`, `canopy`, `lagoon`, `tropic`, `sunset`, `bold`, `pastel`, `atlas`, `swiss`, `winter`). */
 export function styleUrl(
   key: string,
   style: string,
@@ -50,6 +50,10 @@ export function styleUrl(
     overlays?: readonly string[];
     /** Composition preset. Not a style. Explicit overlays replace the profile list. */
     profile?: MapProfile;
+    /** Draw the style on 3D terrain (`?terrain=on`). Any style, flat ones included. */
+    terrain?: boolean;
+    /** Vertical exaggeration for `terrain`, 0.1 to 5; the gateway's default is 1. */
+    exaggeration?: number;
   } = {},
 ): string {
   const q = new URLSearchParams({ key });
@@ -67,6 +71,11 @@ export function styleUrl(
   // overlays without the add-on 403. Omitted when empty so the style URL stays unchanged.
   if (opts.overlays && opts.overlays.length > 0) q.set("overlays", opts.overlays.join(","));
   if (opts.profile) q.set("profile", opts.profile);
+  // Only with terrain: the gateway refuses an exaggeration on its own.
+  if (opts.terrain) {
+    q.set("terrain", "on");
+    if (opts.exaggeration !== undefined) q.set("exaggeration", String(opts.exaggeration));
+  }
   return `${trimGateway(opts.gateway)}/styles/${encodeURIComponent(style)}.json?${q}`;
 }
 

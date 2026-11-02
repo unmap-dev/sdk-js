@@ -41,6 +41,10 @@ export interface StyleInput {
   overlays?: readonly string[];
   /** Composition preset. Not a style. Explicit overlays replace the profile list. */
   profile?: MapProfile;
+  /** Draw the style on 3D terrain (`?terrain=on`). Any style, flat ones included. */
+  terrain?: boolean;
+  /** Vertical exaggeration for `terrain`, 0.1 to 5; the gateway's default is 1. */
+  exaggeration?: number;
 }
 
 function isStyleName(s: string): s is StyleName {
@@ -58,5 +62,7 @@ export function unmapStyle(opts: StyleInput): string {
     theme: opts.theme,
     overlays: opts.overlays,
     profile: opts.profile,
+    terrain: opts.terrain,
+    exaggeration: opts.exaggeration,
   });
 }

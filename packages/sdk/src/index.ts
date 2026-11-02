@@ -64,6 +64,10 @@ export interface UnmapOptions {
   overlays?: readonly string[];
   /** Composition preset. Not a style. Explicit overlays replace the profile list. */
   profile?: MapProfile;
+  /** Draw the style on 3D terrain (`?terrain=on`). Any style, flat ones included. */
+  terrain?: boolean;
+  /** Vertical exaggeration for `terrain`, 0.1 to 5; the gateway's default is 1. */
+  exaggeration?: number;
   /** `"globe"` (the default) or `"mercator"`. See `@unmap/maps` `UnmapMapOptions.projection`. */
   projection?: UnmapMapOptions["projection"];
   center?: [number, number];

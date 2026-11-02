@@ -1,5 +1,11 @@
 # @unmap/themes
 
+## 0.23.0
+
+### Minor Changes
+
+- 6d8deae: `winter`, the fifteenth style, in light and dark: snow-white land, icy water, spruce woods and a cold blue highway, with hillshade and contours, made for the ski overlay. Its bare preset code is `u0F`, and `STYLE_NAMES` includes it.
+
 ## 0.22.1
 
 ## 0.22.0

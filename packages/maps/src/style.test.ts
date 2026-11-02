@@ -12,6 +12,14 @@ describe("unmapStyle", () => {
       `https://g/styles/${style}.json?key=k&mode=dark`,
     );
   });
+  it.each(["winter"])("resolves %s, the fifteenth style", (style) => {
+    expect(unmapStyle({ key: "k", style, gateway: "https://g" })).toBe(`https://g/styles/${style}.json?key=k`);
+  });
+  it("forwards terrain and its exaggeration", () => {
+    expect(unmapStyle({ key: "k", style: "winter", gateway: "https://g", terrain: true, exaggeration: 2 })).toBe(
+      "https://g/styles/winter.json?key=k&terrain=on&exaggeration=2",
+    );
+  });
   it("defaults to base", () => {
     expect(unmapStyle({ key: "k", gateway: "https://g" })).toContain("/styles/base.json");
     expect(unmapStyle({ key: "k", style: "", gateway: "https://g" })).toContain("/styles/base.json");

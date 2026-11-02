@@ -58,6 +58,15 @@ describe("url builders", () => {
     expect(styleUrl("k", "base", { gateway: "https://g", overlays: [] })).not.toContain("overlays=");
   });
 
+  it("styleUrl asks for 3D terrain, with an exaggeration only when one is given", () => {
+    expect(styleUrl("k", "winter", { gateway: "https://g", terrain: true })).toBe("https://g/styles/winter.json?key=k&terrain=on");
+    expect(styleUrl("k", "winter", { gateway: "https://g", terrain: true, exaggeration: 1.5 })).toBe(
+      "https://g/styles/winter.json?key=k&terrain=on&exaggeration=1.5",
+    );
+    // The gateway 400s an exaggeration without terrain, so the client never sends one alone.
+    expect(styleUrl("k", "winter", { gateway: "https://g", exaggeration: 1.5 })).toBe("https://g/styles/winter.json?key=k");
+  });
+
   it("styleUrl forwards profile and omits it otherwise", () => {
     expect(styleUrl("k", "muted", { gateway: "https://g", profile: "energy" })).toBe(
       "https://g/styles/muted.json?key=k&profile=energy",

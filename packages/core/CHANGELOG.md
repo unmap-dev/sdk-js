@@ -1,5 +1,11 @@
 # @unmap/core
 
+## 0.23.0
+
+### Minor Changes
+
+- 78bb54f: `terrain: true` (and `exaggeration`, 0.1 to 5) on `styleUrl`, `unmapStyle`, `createMap` and `new Unmap()` asks the gateway for the style on 3D terrain (`?terrain=on`). Works on every style.
+
 ## 0.22.1
 
 ## 0.22.0

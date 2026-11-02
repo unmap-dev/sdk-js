@@ -1,5 +1,18 @@
 # @unmap/maps
 
+## 0.23.0
+
+### Minor Changes
+
+- 78bb54f: `terrain: true` (and `exaggeration`, 0.1 to 5) on `styleUrl`, `unmapStyle`, `createMap` and `new Unmap()` asks the gateway for the style on 3D terrain (`?terrain=on`). Works on every style.
+- 6d8deae: `winter`, the fifteenth style, in light and dark: snow-white land, icy water, spruce woods and a cold blue highway, with hillshade and contours, made for the ski overlay. Its bare preset code is `u0F`, and `STYLE_NAMES` includes it.
+
+### Patch Changes
+
+- Updated dependencies [78bb54f]
+  - @unmap/core@0.23.0
+  - @unmap/geocoding@0.23.0
+
 ## 0.22.1
 
 ### Patch Changes
