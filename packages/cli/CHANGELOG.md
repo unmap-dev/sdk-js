@@ -1,5 +1,49 @@
 # @unmap/cli
 
+## 0.27.0
+
+### Patch Changes
+
+- 4b0e2ab: `unmap add` knows `map-announcer`.
+  - @unmap/core@0.27.0
+  - @unmap/geocoding@0.27.0
+
+## 0.26.0
+
+### Patch Changes
+
+- @unmap/core@0.26.0
+- @unmap/geocoding@0.26.0
+
+## 0.25.1
+
+### Patch Changes
+
+- @unmap/core@0.25.1
+- @unmap/geocoding@0.25.1
+
+## 0.25.0
+
+### Minor Changes
+
+- f936af4: `unmap add view-explorer` installs the new view explorer page block (Next.js and Nuxt): can you see the Rockies, or the downtown towers, from a home in Calgary.
+
+### Patch Changes
+
+- @unmap/core@0.25.0
+- @unmap/geocoding@0.25.0
+
+## 0.24.0
+
+### Minor Changes
+
+- 665c660: `unmap add ski-resort-explorer` installs the new ski resort explorer page block (Next.js and Nuxt).
+
+### Patch Changes
+
+- @unmap/core@0.24.0
+- @unmap/geocoding@0.24.0
+
 ## 0.23.0
 
 ### Patch Changes

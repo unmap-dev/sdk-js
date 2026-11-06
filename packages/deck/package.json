@@ -1,0 +1,67 @@
+{
+  "name": "@unmap/deck",
+  "version": "0.27.0",
+  "description": "deck.gl layers for unmap maps: 3D ski lifts on MapLibre terrain, interleaved in one WebGL context",
+  "license": "MIT",
+  "keywords": [
+    "unmap",
+    "deck.gl",
+    "maplibre",
+    "3d",
+    "terrain",
+    "ski"
+  ],
+  "homepage": "https://unmap.dev/docs/apis/maps",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unmap-dev/sdk-js.git",
+    "directory": "packages/deck"
+  },
+  "bugs": {
+    "url": "https://github.com/unmap-dev/sdk-js/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@unmap/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@deck.gl/core": "~9.4.0",
+    "@deck.gl/layers": "~9.4.0",
+    "@deck.gl/maplibre": "~9.4.0",
+    "@deck.gl/mesh-layers": "~9.4.0",
+    "@luma.gl/core": "~9.4.0",
+    "maplibre-gl": "^6.9.0"
+  },
+  "devDependencies": {
+    "@deck.gl/core": "9.4.0",
+    "@deck.gl/layers": "9.4.0",
+    "@deck.gl/maplibre": "9.4.0",
+    "@deck.gl/mesh-layers": "9.4.0",
+    "@luma.gl/core": "9.4.0",
+    "maplibre-gl": "^6.9.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

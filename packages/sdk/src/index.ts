@@ -9,8 +9,10 @@ import { Geocoder, Places, type IdentifyOptions, type IdentifyResponse, type Que
 import { Feedback, Roads } from "./roads";
 import { Transit } from "./transit";
 import { Coverage } from "./coverage";
+import { GeoIp } from "./geoip";
 import { Timezone } from "./timezone";
 import { Byod, Catalog } from "./catalog";
+import { Ski } from "./ski";
 import { Router } from "@unmap/routing";
 import { Elevation } from "@unmap/elevation";
 import type { RetryPolicy } from "@unmap/core";
@@ -21,8 +23,10 @@ export * from "@unmap/elevation";
 export * from "./roads";
 export * from "./transit";
 export * from "./coverage";
+export * from "./geoip";
 export * from "./timezone";
 export * from "./catalog";
+export * from "./ski";
 export { createMap, unmapStyle, DEMO_CITIES, STYLE_NAMES, maplibregl } from "@unmap/maps";
 export type {
   Map,
@@ -78,7 +82,7 @@ export interface UnmapOptions {
 
 /**
  * One Stripe-style key, the whole platform. With a `container` you get a rendered map.
- * `geocoder`, `router`, `elevation`, and `timezone` are always available.
+ * `geocoder`, `router`, `elevation`, `timezone`, and `geoip` are always available.
  *
  *   const map = new Unmap({ key: "um_live_...", container: "#map", center: [-75.69, 45.42] });
  */
@@ -88,6 +92,8 @@ export class Unmap {
   readonly elevation: Elevation;
   /** IANA timezone and the UTC offset at an instant. One call, anywhere. */
   readonly timezone: Timezone;
+  /** City-level location for an IP address, worldwide. Omit the address for the caller's own. */
+  readonly geoip: GeoIp;
   /** Canadian points of interest. Same corpus as the geocoder, in the Place shape. */
   readonly places: Places;
   /** Closures, incidents, construction and road conditions. */
@@ -106,6 +112,8 @@ export class Unmap {
   readonly layers: Catalog;
   /** Your own GeoJSON and PMTiles overlays, stored against this key. */
   readonly byod: Byod;
+  /** Canadian ski areas and their 3D lifts. Needs the Ski add-on; the data is ODbL (OpenStreetMap). */
+  readonly ski: Ski;
   readonly data: { query(opts: QueryOptions): Promise<QueryResponse> };
   readonly map?: MaplibreMap;
 
@@ -114,6 +122,7 @@ export class Unmap {
     this.router = new Router(opts);
     this.elevation = new Elevation(opts);
     this.timezone = new Timezone(opts);
+    this.geoip = new GeoIp(opts);
     this.places = new Places(opts);
     this.roads = new Roads(opts);
     this.feedback = new Feedback(opts);
@@ -121,6 +130,7 @@ export class Unmap {
     this.coverage = new Coverage(opts);
     this.layers = new Catalog(opts);
     this.byod = new Byod(opts);
+    this.ski = new Ski(opts);
     this.data = { query: (queryOpts) => this.geocoder.queryLayer(queryOpts) };
     if (opts.container) {
       this.map = createMap({ ...opts, container: opts.container } as UnmapMapOptions);

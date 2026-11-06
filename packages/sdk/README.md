@@ -67,22 +67,37 @@ new Unmap({ key: 'um_live_...', container: '#map', overlays: [overlay] })
 ```
 
 `upload()` returns the whole record; `overlay` is the `byod:<id>` token that `overlays` takes.
-A `File` goes as multipart, a plain object as GeoJSON, raw bytes as PMTiles.
+A `File` goes as multipart, a plain object as GeoJSON, raw bytes as PMTiles. Upload, list and
+delete with a server key (`um_sk_`): a browser key only reads an overlay by id, and the rest is a
+`403` `server_key_required`.
+
+Canadian ski areas, with the Ski add-on:
+
+```ts
+const { data, meta } = await unmap.ski.areas({ province: 'BC', activity: 'downhill', q: 'whistler' })
+const { data: area } = await unmap.ski.area(data[0].id) // elevation, runs, lifts, aspect, drive
+const { data: lifts } = await unmap.ski.lifts3d(area.id) // stations, pylons and cable as [lng, lat, z]
+const { data: { features } } = await unmap.ski.features(area.id) // runs and lifts with stable ids
+```
+
+The data is derived from OpenStreetMap and is ODbL: show `meta.attribution` with it. It is
+terrain information, not avalanche or safety advice. A key without the add-on gets a `SkiError`
+403 `addon_required`, with the SKU in `addon`.
 
 ## Without a build step
 
 The same SDK loads from a script tag, with MapLibre already inside it:
 
 ```html
-<link rel="stylesheet" href="https://cdn.unmap.dev/sdk/0.23.0/unmap.css">
+<link rel="stylesheet" href="https://cdn.unmap.dev/sdk/0.27.0/unmap.css">
 <div id="map" style="height: 400px"></div>
-<script src="https://cdn.unmap.dev/sdk/0.23.0/unmap.js"></script>
+<script src="https://cdn.unmap.dev/sdk/0.27.0/unmap.js"></script>
 <script>
   unmap.createMap({ key: 'um_live_...', container: '#map', center: [-114.07, 51.05] })
 </script>
 ```
 
-Everything above is on the `unmap` global: `unmap.Unmap`, `unmap.Geocoder`, `unmap.Router`, `unmap.maplibregl`. Pin the exact version in production; `/sdk/0.23/` follows patches and `/sdk/latest/` follows everything.
+Everything above is on the `unmap` global: `unmap.Unmap`, `unmap.Geocoder`, `unmap.Router`, `unmap.maplibregl`. Pin the exact version in production; `/sdk/0.27/` follows patches and `/sdk/latest/` follows everything.
 
 ## Options
 

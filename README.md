@@ -97,12 +97,13 @@ Run the relevant checks and report the local URL and files changed.
 | [@unmap/geocoding](packages/geocoding) | Search, autocomplete, reverse geocoding, places |
 | [@unmap/routing](packages/routing) | Routes, matrices, travel-time areas |
 | [@unmap/elevation](packages/elevation) | Elevation and profiles |
+| [@unmap/deck](packages/deck) | deck.gl layers: 3D ski lifts on terrain |
 | [@unmap/themes](packages/themes) | Theme recipes, validation, sharing codes |
 | [@unmap/react](packages/react) / [@unmap/next](packages/next) | React hooks / Next.js component |
 | [@unmap/vue](packages/vue) / [@unmap/nuxt](packages/nuxt) | Vue composables / Nuxt module |
 | [@unmap/cli](packages/cli) | Scaffolding and component installation |
 
-All twelve packages share a release version. Install only what you need. `examples/` contains the no-build demos; `fixtures/` contains public registry contracts used by the CLI tests.
+All thirteen packages share a release version. Install only what you need. `examples/` contains the no-build demos; `fixtures/` contains public registry contracts used by the CLI tests.
 
 ## Work on the SDK itself
 

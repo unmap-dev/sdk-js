@@ -1,5 +1,21 @@
 # @unmap/themes
 
+## 0.27.0
+
+## 0.26.0
+
+## 0.25.1
+
+### Patch Changes
+
+- 6853196: `winter` reads as snow: forest and woods are snow-loaded grey instead of green, parks and protected
+  areas carry no tint, and open ground takes the snow tones. In the gateway, `winter` also gets a blue
+  hillshade shadow and blue contours.
+
+## 0.25.0
+
+## 0.24.0
+
 ## 0.23.0
 
 ### Minor Changes

@@ -1,5 +1,43 @@
 # @unmap/next
 
+## 0.27.0
+
+### Patch Changes
+
+- Updated dependencies [ad2f498]
+  - @unmap/sdk@0.27.0
+  - @unmap/react@0.27.0
+
+## 0.26.0
+
+### Patch Changes
+
+- Updated dependencies [0f8a382]
+  - @unmap/sdk@0.26.0
+  - @unmap/react@0.26.0
+
+## 0.25.1
+
+### Patch Changes
+
+- @unmap/sdk@0.25.1
+- @unmap/react@0.25.1
+
+## 0.25.0
+
+### Patch Changes
+
+- @unmap/sdk@0.25.0
+- @unmap/react@0.25.0
+
+## 0.24.0
+
+### Patch Changes
+
+- Updated dependencies [122faf6]
+  - @unmap/sdk@0.24.0
+  - @unmap/react@0.24.0
+
 ## 0.23.0
 
 ### Patch Changes

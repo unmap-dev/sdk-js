@@ -68,7 +68,7 @@ and routing as composables for any UI.
 
 Items: `map`, `geocoder`, `routing-panel`, `route-line`, `route-steps`, `geojson-layer`, `cluster-layer`,
 `heatmap-layer`, `arc-layer`, `flow-layer`, `marker-popup`, `map-controls`, `map-themes`,
-`map-context`, `map-layers`, `layer-legend`, `measure`, `feature-inspector`, `time-slider`,
+`map-context`, `map-layers`, `layer-legend`, `measure`, `map-announcer`, `feature-inspector`, `time-slider`,
 `draw`, `compare-swipe`, `elevation-profile`, `store-locator`, `directions`, `flow-map`,
 `elevation-explorer`, `delivery-tracker`, `census-choropleth`, `land-treaty-inspector`,
 `address-playground`, `energy-explorer`, `energy-map`, `energy-layer-control`, `well-search`,

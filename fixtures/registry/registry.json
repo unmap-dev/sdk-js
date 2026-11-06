@@ -154,6 +154,15 @@
       ]
     },
     {
+      "name": "map-announcer",
+      "type": "registry:ui",
+      "files": [
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "feature-inspector",
       "type": "registry:ui",
       "files": [
@@ -305,6 +314,30 @@
     },
     {
       "name": "energy-explorer",
+      "type": "registry:block",
+      "files": [
+        {
+          "type": "registry:page"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "ski-resort-explorer",
+      "type": "registry:block",
+      "files": [
+        {
+          "type": "registry:page"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "view-explorer",
       "type": "registry:block",
       "files": [
         {

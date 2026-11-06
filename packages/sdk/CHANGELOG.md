@@ -1,5 +1,67 @@
 # @unmap/sdk
 
+## 0.27.0
+
+### Minor Changes
+
+- ad2f498: Add `unmap.geoip.locate(ip?)`, city-level location for an IP address anywhere in the world, with the caller's own address as the default.
+
+### Patch Changes
+
+- @unmap/core@0.27.0
+- @unmap/maps@0.27.0
+- @unmap/geocoding@0.27.0
+- @unmap/routing@0.27.0
+- @unmap/elevation@0.27.0
+
+## 0.26.0
+
+### Minor Changes
+
+- 0f8a382: `unmap.ski.features(id)` lists one ski area's runs and lifts from `GET /ski/areas/{id}/features`, each with a stable OpenStreetMap-derived `id` (`way-<n>` or `relation-<n>`), its name, kind, piste type, difficulty or lift type, GeoJSON geometry and length. A lift's id is the one `unmap.ski.lifts3d(id)` already gives it, and the `ski` tiles' runs and lifts carry the same id. New types: `SkiFeature`, `SkiFeatures`, `SkiFeatureGeometry`, `SkiLngLat`.
+
+### Patch Changes
+
+- @unmap/core@0.26.0
+- @unmap/maps@0.26.0
+- @unmap/geocoding@0.26.0
+- @unmap/routing@0.26.0
+- @unmap/elevation@0.26.0
+
+## 0.25.1
+
+### Patch Changes
+
+- @unmap/core@0.25.1
+- @unmap/maps@0.25.1
+- @unmap/geocoding@0.25.1
+- @unmap/routing@0.25.1
+- @unmap/elevation@0.25.1
+
+## 0.25.0
+
+### Patch Changes
+
+- @unmap/core@0.25.0
+- @unmap/maps@0.25.0
+- @unmap/geocoding@0.25.0
+- @unmap/routing@0.25.0
+- @unmap/elevation@0.25.0
+
+## 0.24.0
+
+### Minor Changes
+
+- 122faf6: `unmap.ski`: `areas({ province, activity, bbox, q })`, `area(id)` and `lifts3d(id)` for the Ski add-on's `/ski/areas`, `/ski/areas/{id}` and `/ski/areas/{id}/lifts-3d`, with the `SkiArea`, `SkiLifts3d` and `SkiMeta` types. Failures are `SkiError` (an `UnmapError`), carrying the add-on SKU on a 403 `addon_required`.
+
+### Patch Changes
+
+- @unmap/core@0.24.0
+- @unmap/maps@0.24.0
+- @unmap/geocoding@0.24.0
+- @unmap/routing@0.24.0
+- @unmap/elevation@0.24.0
+
 ## 0.23.0
 
 ### Minor Changes

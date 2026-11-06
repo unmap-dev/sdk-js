@@ -10,6 +10,7 @@
       "@unmap/geocoding",
       "@unmap/routing",
       "@unmap/elevation",
+      "@unmap/deck",
       "@unmap/themes",
       "@unmap/vue",
       "@unmap/nuxt",

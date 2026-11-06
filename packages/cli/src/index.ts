@@ -86,6 +86,7 @@ export const REGISTRY_ITEMS = [
   "map-layers",
   "layer-legend",
   "measure",
+  "map-announcer",
   "feature-inspector",
   "time-slider",
   "draw",
@@ -100,6 +101,8 @@ export const REGISTRY_ITEMS = [
   "land-treaty-inspector",
   "address-playground",
   "energy-explorer",
+  "ski-resort-explorer",
+  "view-explorer",
   "energy-map",
   "energy-layer-control",
   "well-search",
@@ -126,6 +129,8 @@ export const REGISTRY_BLOCKS = [
   "land-treaty-inspector",
   "address-playground",
   "energy-explorer",
+  "ski-resort-explorer",
+  "view-explorer",
 ] as const;
 
 export function isBlock(name: string): boolean {

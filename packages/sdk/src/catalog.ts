@@ -198,7 +198,8 @@ export class Catalog extends KeyedClient {
 }
 
 /**
- * Tenant overlays: your own GeoJSON or PMTiles, stored against your key.
+ * Tenant overlays: your own GeoJSON or PMTiles, stored against your key. `upload`, `list` and
+ * `delete` need a server key; a browser key only reads an overlay by id (403 `server_key_required`).
  *
  *   const { overlay } = await unmap.byod.upload(file, { name: "Service areas" });
  *   const map = new Unmap({ key, container: "#map", overlays: [overlay] });

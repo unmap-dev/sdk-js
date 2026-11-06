@@ -2119,20 +2119,23 @@ export function buildRecipes(
 
   /**
    * `winter` / `light`. Snow country: the land is near-white `ink`, so the winter landscape reads
-   * as snow rather than as the absence of data, water is icy `azure`, and woods are a spruce
-   * `jade` that stands dark against the snow the way a forest does from a chairlift. Roads are
-   * white with cool casings and the highway is a cold `cobalt`, so nothing warm competes with the
-   * ski overlay, whose difficulty colours (green, blue, black, orange) are the content here.
-   * Labels keep `outdoor`'s contrast-safe `ink` steps.
+   * as snow rather than as the absence of data, and water is icy `azure`. Woods are snow-loaded
+   * forest, a cool grey a few `ink` steps below the snow: darker than the open ground so the
+   * treeline still reads, but with no green, because a green forest made a winter trail map read
+   * as summer next to other resorts' maps (2026-11-04). Parks and protected areas carry no tint
+   * at all; in the mountains a national park covers whole ranges, and a green park fill there
+   * hid the snow. Roads are white with cool casings and the highway is a cold `cobalt`, so
+   * nothing warm competes with the ski overlay, whose difficulty colours (green, blue, black,
+   * orange) are the content here. Labels keep `outdoor`'s contrast-safe `ink` steps.
    */
   const WINTER_LIGHT: Recipe = {
     background: r.ink[50],
     earth: r.ink[25],
     water: r.azure[300],
-    parkA: r.jade[200],
-    parkB: r.jade[300],
-    woodA: r.jade[400],
-    woodB: r.jade[500],
+    parkA: r.ink[25],
+    parkB: r.ink[50],
+    woodA: r.ink[300],
+    woodB: r.ink[400],
     scrubA: r.ink[100],
     scrubB: r.ink[200],
     sand: r.ink[100],
@@ -2191,31 +2194,32 @@ export function buildRecipes(
       turquoise: r.wave[700],
     },
     landcover: {
-      // Snow covers the open ground, so grass, barren land and fields all go to the snow tones
-      // and only the forest keeps colour.
-      grassland: r.ink[100],
-      barren: r.ink[100],
+      // Snow covers the open ground, so grass, barren land and fields all go to the snow tones,
+      // and forest is the snow-loaded grey of the woods above, a step lighter for the broad
+      // low-zoom cover.
+      grassland: r.ink[50],
+      barren: r.ink[50],
       urban_area: r.ink[100],
       farmland: r.ink[50],
       glacier: r.ink[25],
       scrub: r.ink[200],
-      forest: r.jade[500],
+      forest: r.ink[200],
     },
   };
 
   /**
    * `winter` / `dark`. Night skiing: `outdoor`'s dark `ink` ground, water a step darker still,
-   * spruce lifted to the mid `jade` steps so the forest stays visible against the dark snow, and
-   * the cobalt highway kept.
+   * forest in navy `cobalt` so it stays visible against the dark snow without turning green, parks
+   * untinted as in light, and the cobalt highway kept.
    */
   const WINTER_DARK: Recipe = {
     background: r.ink[1000],
     earth: r.ink[950],
     water: r.azure[980],
-    parkA: r.jade[850],
-    parkB: r.jade[800],
-    woodA: r.jade[800],
-    woodB: r.jade[700],
+    parkA: r.ink[950],
+    parkB: r.ink[900],
+    woodA: r.cobalt[900],
+    woodB: r.cobalt[850],
     scrubA: r.ink[900],
     scrubB: r.ink[850],
     sand: r.ink[850],
@@ -2280,7 +2284,7 @@ export function buildRecipes(
       farmland: r.ink[900],
       glacier: r.ink[800],
       scrub: r.ink[850],
-      forest: r.jade[700],
+      forest: r.cobalt[900],
     },
   };
 

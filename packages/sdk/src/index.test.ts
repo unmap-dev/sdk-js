@@ -86,6 +86,48 @@ describe("Unmap", () => {
     expect(calls[0]).toContain("lat=51.0447");
     expect(calls[0]).toContain("at=2026-07-01T18%3A00%3A00.000Z");
   });
+
+  it("calls /geoip with the ip when given and without it when not", async () => {
+    const calls: string[] = [];
+    const fetchImpl = (async (input: RequestInfo | URL) => {
+      calls.push(String(input));
+      return new Response(
+        JSON.stringify({
+          ip: "8.8.8.8",
+          found: true,
+          country_code: "US",
+          coordinates: [-97.822, 37.751],
+          attribution: { text: "IP Geolocation by DB-IP", url: "https://db-ip.com" },
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }) as unknown as typeof fetch;
+
+    const unmap = new Unmap({ key: "um_test_x", fetch: fetchImpl });
+    const here = await unmap.geoip.locate("8.8.8.8");
+    expect(here.found && here.country_code).toBe("US");
+    expect(here.attribution.url).toBe("https://db-ip.com");
+    await unmap.geoip.locate();
+    expect(calls[0]).toContain("/geoip?");
+    expect(calls[0]).toContain("ip=8.8.8.8");
+    expect(calls[1]).toContain("/geoip?");
+    expect(calls[1]).not.toContain("ip=");
+    expect(calls[1]).toContain("key=um_test_x");
+  });
+
+  it("throws GeoIpError carrying the code on a 400 invalid_ip", async () => {
+    const fetchImpl = (async () =>
+      new Response(JSON.stringify({ error: "not a public address", code: "invalid_ip" }), {
+        status: 400,
+        headers: { "content-type": "application/json" },
+      })) as unknown as typeof fetch;
+    const unmap = new Unmap({ key: "um_test_x", fetch: fetchImpl });
+    await expect(unmap.geoip.locate("10.0.0.1")).rejects.toMatchObject({
+      name: "GeoIpError",
+      status: 400,
+      code: "invalid_ip",
+    });
+  });
 });
 
 describe("coverage document types", () => {

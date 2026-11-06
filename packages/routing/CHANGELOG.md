@@ -1,5 +1,35 @@
 # @unmap/routing
 
+## 0.27.0
+
+### Patch Changes
+
+- @unmap/core@0.27.0
+
+## 0.26.0
+
+### Patch Changes
+
+- @unmap/core@0.26.0
+
+## 0.25.1
+
+### Patch Changes
+
+- @unmap/core@0.25.1
+
+## 0.25.0
+
+### Patch Changes
+
+- @unmap/core@0.25.0
+
+## 0.24.0
+
+### Patch Changes
+
+- @unmap/core@0.24.0
+
 ## 0.23.0
 
 ### Patch Changes
