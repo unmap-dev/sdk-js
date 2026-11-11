@@ -1,5 +1,12 @@
 # @unmap/nuxt
 
+## 0.30.0
+
+### Patch Changes
+
+- @unmap/vue@0.30.0
+- @unmap/core@0.30.0
+
 ## 0.29.0
 
 ### Patch Changes

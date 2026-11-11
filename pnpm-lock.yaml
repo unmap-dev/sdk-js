@@ -120,16 +120,31 @@ importers:
 
   packages/maps:
     dependencies:
+      '@mapbox/vector-tile':
+        specifier: ^3.0.0
+        version: 3.0.0
+      '@types/geojson':
+        specifier: ^7946.0.16
+        version: 7946.0.16
       '@unmap/core':
         specifier: workspace:*
         version: link:../core
       '@unmap/geocoding':
         specifier: workspace:*
         version: link:../geocoding
+      pbf:
+        specifier: ^5.1.2
+        version: 5.1.2
     devDependencies:
+      '@maplibre/geojson-vt':
+        specifier: 6.1.2
+        version: 6.1.2
       '@maplibre/maplibre-gl-geocoder':
         specifier: 1.9.4
         version: 1.9.4(maplibre-gl@6.13.0)
+      '@maplibre/vt-pbf':
+        specifier: 4.3.2
+        version: 4.3.2
       maplibre-gl:
         specifier: ^6.9.0
         version: 6.13.0

@@ -1,5 +1,16 @@
 # @unmap/sdk
 
+## 0.30.0
+
+### Patch Changes
+
+- Updated dependencies [8e01899]
+  - @unmap/maps@0.30.0
+  - @unmap/core@0.30.0
+  - @unmap/geocoding@0.30.0
+  - @unmap/routing@0.30.0
+  - @unmap/elevation@0.30.0
+
 ## 0.29.0
 
 ### Minor Changes

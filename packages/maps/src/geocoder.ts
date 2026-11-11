@@ -22,11 +22,13 @@ import * as maplibregl from "maplibre-gl";
 /**
  * A Carmen GeoJSON feature, with the unmap result it came from, untouched, on `properties.unmap`.
  *
- * Declared here rather than as the plugin's `CarmenGeojsonFeature & {...}`: under MapLibre 6 the
- * plugin's own declarations do not resolve (they import a `maplibre-gl` default export that no
- * longer exists and the `GeoJSON` namespace without depending on `@types/geojson`), and that type
- * silently becomes `any`, which would take these fields' types down with it. This shape is a
- * structural match for it, so a feature is accepted wherever the plugin wants one.
+ * Declared here rather than as the plugin's `CarmenGeojsonFeature & {...}`: the plugin's
+ * declarations import a `maplibre-gl` default export that MapLibre 6 no longer has, and they leave
+ * out the Carmen fields this adapter fills (`address`, `context`, `properties.unmap`), so a caller
+ * reading those through the plugin's type gets a type error. The `GeoJSON` namespace it builds on
+ * does resolve (`@types/geojson` arrives with maplibre-gl and is a dependency of this package).
+ * This shape is a structural match for the plugin's type, so a feature is accepted wherever the
+ * plugin wants one; cast a plugin result to it to read the extra fields.
  */
 export interface UnmapCarmenFeature {
   type: "Feature";

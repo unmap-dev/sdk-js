@@ -1,5 +1,16 @@
 # @unmap/maps
 
+## 0.30.0
+
+### Minor Changes
+
+- 8e01899: Add `@unmap/maps/tiles`: `tileFeatures({ key, bbox, layers })` reads the basemap's z14 vector tiles over a box and returns GeoJSON features per layer.
+
+### Patch Changes
+
+- @unmap/core@0.30.0
+- @unmap/geocoding@0.30.0
+
 ## 0.29.0
 
 ### Patch Changes

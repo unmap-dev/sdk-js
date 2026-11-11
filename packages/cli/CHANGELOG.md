@@ -1,5 +1,16 @@
 # @unmap/cli
 
+## 0.30.0
+
+### Minor Changes
+
+- cace11b: `unmap add alive-route-explorer` installs the new alive route explorer page block (Next.js): walking directions that trade a minute for a nicer walk. It is React-only for now, so a Vue project gets the React-only refusal until its Vue lane ships.
+
+### Patch Changes
+
+- @unmap/core@0.30.0
+- @unmap/geocoding@0.30.0
+
 ## 0.29.0
 
 ### Minor Changes

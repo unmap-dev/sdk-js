@@ -361,6 +361,48 @@
       ]
     },
     {
+      "name": "alive-route-explorer",
+      "type": "registry:block",
+      "files": [
+        {
+          "type": "registry:page"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:lib"
+        },
+        {
+          "type": "registry:lib"
+        },
+        {
+          "type": "registry:lib"
+        },
+        {
+          "type": "registry:lib"
+        },
+        {
+          "type": "registry:lib"
+        },
+        {
+          "type": "registry:lib"
+        },
+        {
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "energy-layer-control",
       "type": "registry:ui",
       "files": [

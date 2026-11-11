@@ -224,7 +224,7 @@ describe("create helpers", () => {
     });
     expect(parseOnly("globe")).toEqual({
       error:
-        "unknown item 'globe'. Items: map, geocoder, routing-panel, route-line, route-steps, geojson-layer, cluster-layer, heatmap-layer, arc-layer, flow-layer, marker-popup, map-controls, map-themes, map-context, map-layers, layer-legend, measure, map-announcer, feature-inspector, time-slider, draw, compare-swipe, elevation-profile, store-locator, directions, flow-map, elevation-explorer, delivery-tracker, census-choropleth, land-treaty-inspector, address-playground, energy-explorer, ski-resort-explorer, view-explorer, urban-noise-map, energy-map, energy-layer-control, well-search, legal-land-search, energy-popup, treaty-context, api-calls, api-inspector, business-locator-01, local-guide-01, public-notices-01, map-story-01, map-markers-01, map-measure-01, map-inspect-01, map-timeline-01, map-draw-01, map-compare-01, map-elevation-01, map-geojson-01, map-clusters-01, map-heatmap-01, map-arcs-01, map-flows-01.",
+        "unknown item 'globe'. Items: map, geocoder, routing-panel, route-line, route-steps, geojson-layer, cluster-layer, heatmap-layer, arc-layer, flow-layer, marker-popup, map-controls, map-themes, map-context, map-layers, layer-legend, measure, map-announcer, feature-inspector, time-slider, draw, compare-swipe, elevation-profile, store-locator, directions, flow-map, elevation-explorer, delivery-tracker, census-choropleth, land-treaty-inspector, address-playground, energy-explorer, ski-resort-explorer, view-explorer, urban-noise-map, energy-map, energy-layer-control, well-search, legal-land-search, energy-popup, treaty-context, api-calls, api-inspector, business-locator-01, local-guide-01, public-notices-01, map-story-01, map-markers-01, map-measure-01, map-inspect-01, map-timeline-01, map-draw-01, map-compare-01, map-elevation-01, map-geojson-01, map-clusters-01, map-heatmap-01, map-arcs-01, map-flows-01, alive-route-explorer.",
     });
   });
 
@@ -373,7 +373,7 @@ describe("create helpers", () => {
 
 describe("block helpers", () => {
   it("knows the blocks and what their components are called in each lane", () => {
-    expect([...REGISTRY_BLOCKS]).toEqual(["store-locator", "directions", "flow-map", "elevation-explorer", "delivery-tracker", "census-choropleth", "land-treaty-inspector", "address-playground", "energy-explorer", "ski-resort-explorer", "view-explorer", "urban-noise-map"]);
+    expect([...REGISTRY_BLOCKS]).toEqual(["store-locator", "directions", "flow-map", "elevation-explorer", "delivery-tracker", "census-choropleth", "land-treaty-inspector", "address-playground", "energy-explorer", "ski-resort-explorer", "view-explorer", "urban-noise-map", "alive-route-explorer"]);
     expect(isBlock("flow-map")).toBe(true);
     expect(isBlock("flow-layer")).toBe(false);
     expect(blockComponent("store-locator", "react")).toBe("StoreLocator");

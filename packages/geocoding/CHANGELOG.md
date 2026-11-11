@@ -1,5 +1,11 @@
 # @unmap/geocoding
 
+## 0.30.0
+
+### Patch Changes
+
+- @unmap/core@0.30.0
+
 ## 0.29.0
 
 ### Patch Changes

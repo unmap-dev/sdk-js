@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { GeocodeResult } from "@unmap/geocoding";
+import type { UnmapCarmenFeature } from "./geocoder";
 
 /**
  * The plugin draws DOM and the package runs no DOM environment, so its constructor is mocked and
@@ -165,7 +166,7 @@ describe("unmapGeocoderApi", () => {
     const api = unmapGeocoderApi({ key: "um_test_x", fetch: stubFetch([calgaryAddress]) });
     const res = await api.reverseGeocode!({ query: [-114.0849, 51.0446] });
     expect(calls[0]!.pathname).toBe("/geocode/reverse");
-    expect(res.features[0]?.address).toBe("1000");
+    expect((res.features[0] as UnmapCarmenFeature | undefined)?.address).toBe("1000");
   });
 
   it("returns an empty collection for a blank query", async () => {
