@@ -84,20 +84,33 @@ The data is derived from OpenStreetMap and is ODbL: show `meta.attribution` with
 terrain information, not avalanche or safety advice. A key without the add-on gets a `SkiError`
 403 `addon_required`, with the SKU in `addon`.
 
+Modelled urban noise for six Canadian cities, with the Urban Noise add-on:
+
+```ts
+const { data, meta } = await unmap.noise.point({ lat: 51.054, lng: -114.0884 })
+// data.lden, data.lnight (dB), data.score and data.label ("Quiet" … "Severe"),
+// data.exceeds_who, data.dominant_source, data.sources_db
+```
+
+Calgary, Edmonton, Vancouver, Toronto, Montréal and Québec City; a point outside them throws a
+`NoiseError` 422 `outside_coverage` with the covered `cities`. A hexagon with no modelled source
+has `lden: null`, never 0 dB. The levels are derived from OpenStreetMap and are ODbL: show
+`meta.attribution` with them. They are modelled, not measured.
+
 ## Without a build step
 
 The same SDK loads from a script tag, with MapLibre already inside it:
 
 ```html
-<link rel="stylesheet" href="https://cdn.unmap.dev/sdk/0.27.0/unmap.css">
+<link rel="stylesheet" href="https://cdn.unmap.dev/sdk/0.29.0/unmap.css">
 <div id="map" style="height: 400px"></div>
-<script src="https://cdn.unmap.dev/sdk/0.27.0/unmap.js"></script>
+<script src="https://cdn.unmap.dev/sdk/0.29.0/unmap.js"></script>
 <script>
   unmap.createMap({ key: 'um_live_...', container: '#map', center: [-114.07, 51.05] })
 </script>
 ```
 
-Everything above is on the `unmap` global: `unmap.Unmap`, `unmap.Geocoder`, `unmap.Router`, `unmap.maplibregl`. Pin the exact version in production; `/sdk/0.27/` follows patches and `/sdk/latest/` follows everything.
+Everything above is on the `unmap` global: `unmap.Unmap`, `unmap.Geocoder`, `unmap.Router`, `unmap.maplibregl`. Pin the exact version in production; `/sdk/0.29/` follows patches and `/sdk/latest/` follows everything.
 
 ## Options
 

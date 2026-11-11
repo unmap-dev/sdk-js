@@ -1,5 +1,31 @@
 # @unmap/sdk
 
+## 0.29.0
+
+### Minor Changes
+
+- e90aac5: `unmap.noise.point({ lat, lng })`: modelled urban noise for six Canadian cities from the Urban Noise add-on, with `NoiseError` carrying the SKU on a 403 and the covered cities on a 422 `outside_coverage`.
+- c8c5df8: `Layer.namespace` includes `noise` and `LayerCapability` includes `urbanNoise`, for the Urban Noise add-on's catalog layer.
+
+### Patch Changes
+
+- @unmap/core@0.29.0
+- @unmap/maps@0.29.0
+- @unmap/geocoding@0.29.0
+- @unmap/routing@0.29.0
+- @unmap/elevation@0.29.0
+
+## 0.28.0
+
+### Patch Changes
+
+- Updated dependencies [118e76e]
+  - @unmap/geocoding@0.28.0
+  - @unmap/maps@0.28.0
+  - @unmap/core@0.28.0
+  - @unmap/routing@0.28.0
+  - @unmap/elevation@0.28.0
+
 ## 0.27.0
 
 ### Minor Changes

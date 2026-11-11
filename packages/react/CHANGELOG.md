@@ -1,5 +1,19 @@
 # @unmap/react
 
+## 0.29.0
+
+### Patch Changes
+
+- Updated dependencies [e90aac5]
+- Updated dependencies [c8c5df8]
+  - @unmap/sdk@0.29.0
+
+## 0.28.0
+
+### Patch Changes
+
+- @unmap/sdk@0.28.0
+
 ## 0.27.0
 
 ### Patch Changes

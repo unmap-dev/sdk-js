@@ -103,6 +103,7 @@ export const REGISTRY_ITEMS = [
   "energy-explorer",
   "ski-resort-explorer",
   "view-explorer",
+  "urban-noise-map",
   "energy-map",
   "energy-layer-control",
   "well-search",
@@ -131,6 +132,7 @@ export const REGISTRY_BLOCKS = [
   "energy-explorer",
   "ski-resort-explorer",
   "view-explorer",
+  "urban-noise-map",
 ] as const;
 
 export function isBlock(name: string): boolean {

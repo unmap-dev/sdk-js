@@ -1,6 +1,6 @@
 {
   "name": "@unmap/sdk",
-  "version": "0.27.0",
+  "version": "0.29.0",
   "description": "One key, the whole unmap platform: map + geocoder + router",
   "license": "MIT",
   "keywords": [

@@ -1,5 +1,21 @@
 # @unmap/geocoding
 
+## 0.29.0
+
+### Patch Changes
+
+- @unmap/core@0.29.0
+
+## 0.28.0
+
+### Minor Changes
+
+- 118e76e: Add `places.along(route, category, opts?)` for `POST /places/along`: places of a category within a few metres of a route, in the order the route reaches them. Pass the `geometry` a route response carries; each place comes back with `distance` (metres off the route) and `along` (metres from the start). `@unmap/geocoding/along` exports the endpoint's limits (`PLACES_ALONG`) and its line check (`checkAlongLine`): 2,000 coordinates, 100 km, radius 10-500 m, limit 1-200.
+
+### Patch Changes
+
+- @unmap/core@0.28.0
+
 ## 0.27.0
 
 ### Patch Changes

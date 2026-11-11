@@ -1,5 +1,24 @@
 # @unmap/cli
 
+## 0.29.0
+
+### Minor Changes
+
+- cba5ea9: `unmap add urban-noise-map` installs the new urban noise page block (Next.js and Nuxt): modelled noise in six Canadian cities with a Day / Night switch and a spot's level against the WHO guideline. Needs the Urban Noise add-on.
+
+### Patch Changes
+
+- @unmap/core@0.29.0
+- @unmap/geocoding@0.29.0
+
+## 0.28.0
+
+### Patch Changes
+
+- Updated dependencies [118e76e]
+  - @unmap/geocoding@0.28.0
+  - @unmap/core@0.28.0
+
 ## 0.27.0
 
 ### Patch Changes

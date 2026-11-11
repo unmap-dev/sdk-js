@@ -1,5 +1,20 @@
 # @unmap/maps
 
+## 0.29.0
+
+### Patch Changes
+
+- @unmap/core@0.29.0
+- @unmap/geocoding@0.29.0
+
+## 0.28.0
+
+### Patch Changes
+
+- Updated dependencies [118e76e]
+  - @unmap/geocoding@0.28.0
+  - @unmap/core@0.28.0
+
 ## 0.27.0
 
 ### Patch Changes

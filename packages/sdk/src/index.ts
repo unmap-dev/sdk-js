@@ -13,6 +13,7 @@ import { GeoIp } from "./geoip";
 import { Timezone } from "./timezone";
 import { Byod, Catalog } from "./catalog";
 import { Ski } from "./ski";
+import { Noise } from "./noise";
 import { Router } from "@unmap/routing";
 import { Elevation } from "@unmap/elevation";
 import type { RetryPolicy } from "@unmap/core";
@@ -27,6 +28,7 @@ export * from "./geoip";
 export * from "./timezone";
 export * from "./catalog";
 export * from "./ski";
+export * from "./noise";
 export { createMap, unmapStyle, DEMO_CITIES, STYLE_NAMES, maplibregl } from "@unmap/maps";
 export type {
   Map,
@@ -114,6 +116,8 @@ export class Unmap {
   readonly byod: Byod;
   /** Canadian ski areas and their 3D lifts. Needs the Ski add-on; the data is ODbL (OpenStreetMap). */
   readonly ski: Ski;
+  /** Modelled urban noise for six Canadian cities. Needs the Urban Noise add-on; the data is ODbL. */
+  readonly noise: Noise;
   readonly data: { query(opts: QueryOptions): Promise<QueryResponse> };
   readonly map?: MaplibreMap;
 
@@ -131,6 +135,7 @@ export class Unmap {
     this.layers = new Catalog(opts);
     this.byod = new Byod(opts);
     this.ski = new Ski(opts);
+    this.noise = new Noise(opts);
     this.data = { query: (queryOpts) => this.geocoder.queryLayer(queryOpts) };
     if (opts.container) {
       this.map = createMap({ ...opts, container: opts.container } as UnmapMapOptions);

@@ -35,8 +35,10 @@ export interface Place {
     postcode?: string;
     country?: string;
   };
-  /** Metres from the anchor. Only on `nearby()`. */
+  /** Metres from the anchor on `nearby()`; metres off the route on `along()`. */
   distance?: number;
+  /** Metres from the start of the route to the nearest point on it. Only on `along()`. */
+  along?: number;
   /** Registry id of the dataset, for provenance. */
   source: string;
 }
@@ -95,6 +97,21 @@ export interface PlaceNearbyOptions {
   limit?: number;
   lang?: string;
   signal?: AbortSignal;
+}
+
+export interface PlaceAlongOptions {
+  /** Metres either side of the route, clamped server-side to 10..500. Default 50. */
+  radius?: number;
+  /** 1..200, default 50. Out of range is status 400. */
+  limit?: number;
+  lang?: string;
+  signal?: AbortSignal;
+}
+
+/** A GeoJSON LineString, the shape `/route` returns as `geometry`. */
+export interface RouteLine {
+  type: "LineString";
+  coordinates: number[][];
 }
 
 /**
@@ -196,6 +213,32 @@ export class Places {
   }
 
   /**
+   * Places of a category along a route, in the order the route reaches them.
+   *
+   * Pass the `geometry` a route response carries; each place comes back with `distance` (metres
+   * off the route) and `along` (metres from the start), sorted by `along`. The line is capped at
+   * 2,000 coordinates and 100 km (status 400 beyond either), and every coordinate must be in
+   * Canada (status 422, code `outside_coverage`). `category` resolves aliases as `nearby()` does.
+   *
+   *   const route = await router.route(from, to, { mode: "pedestrian" });
+   *   const { data } = await places.along(route.geometry, "cafe");
+   */
+  along(
+    route: RouteLine,
+    category: string | readonly string[],
+    opts: PlaceAlongOptions = {},
+  ): Promise<PlacesResponse<Place[]>> {
+    const body = {
+      route,
+      category: Array.isArray(category) ? category.join(",") : String(category),
+      ...(opts.radius != null ? { radius: opts.radius } : {}),
+      ...(opts.limit != null ? { limit: opts.limit } : {}),
+      ...(opts.lang ? { lang: opts.lang } : {}),
+    };
+    return this.request<Place[]>("/places/along", {}, opts.signal, body);
+  }
+
+  /**
    * One place by its unmap id.
    *
    * Throws `PlacesError` with status 404 when it does not exist. A malformed id is also a 404,
@@ -210,15 +253,15 @@ export class Places {
     path: string,
     params: Record<string, string | undefined>,
     signal?: AbortSignal,
+    body?: unknown,
   ): Promise<PlacesResponse<T>> {
     const q = new URLSearchParams({ key: this.key });
     for (const [k, v] of Object.entries(params)) if (v != null && v !== "") q.set(k, v);
-    const res = await fetchWithRetry(
-      this.fetchImpl,
-      `${this.base}${path}?${q}`,
-      { signal, headers: { accept: "application/json" } },
-      this.retry,
-    );
+    const init: RequestInit =
+      body === undefined
+        ? { signal, headers: { accept: "application/json" } }
+        : { method: "POST", signal, headers: { accept: "application/json", "content-type": "application/json" }, body: JSON.stringify(body) };
+    const res = await fetchWithRetry(this.fetchImpl, `${this.base}${path}?${q}`, init, this.retry);
     if (!res.ok) throw await errorFrom(res, path);
     return (await res.json()) as PlacesResponse<T>;
   }

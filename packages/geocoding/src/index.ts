@@ -261,8 +261,10 @@ export interface GeocodeResult {
   match_reasons?: GeocodeMatchReason[];
   /** Canonical category id (e.g. "health.pharmacy") when the feature carries one. */
   category?: string;
-  /** Spheroidal metres from the query anchor; only `/geocode/nearby` results carry it. */
+  /** Spheroidal metres from the query anchor (`/geocode/nearby`), or off the route (`/places/along`). */
   distance?: number;
+  /** Metres from the start of the route; only the geocode container's `/along` sets it. */
+  along?: number;
   names?: Record<string, string>;
   address?: {
     housenumber?: string;
@@ -626,6 +628,8 @@ export {
   type PlacesOptions,
   type PlaceSearchOptions,
   type PlaceNearbyOptions,
+  type PlaceAlongOptions,
+  type RouteLine,
 } from "./places";
 
 // The shared error type and retry policy, re-exported so a caller who installed only this

@@ -137,3 +137,39 @@ describe("the client surface", () => {
     expect(String(error)).not.toContain("um_test_k");
   });
 });
+
+describe("Places.along", () => {
+  const route = { type: "LineString" as const, coordinates: [[-114.07, 51.04], [-114.07, 51.05]] };
+
+  it("POSTs the route, category and options as JSON to /places/along", async () => {
+    let init: RequestInit | undefined;
+    const { places, seen } = client((_, i) => {
+      init = i;
+      return envelope([{ ...PLACE, distance: 12, along: 340 }]);
+    });
+    const res = await places.along(route, ["cafe", "bakery"], { radius: 35, limit: 20, lang: "fr" });
+    expect(seen[0]!.pathname).toBe("/places/along");
+    expect(seen[0]!.searchParams.get("key")).toBe("um_test_k");
+    expect(init?.method).toBe("POST");
+    expect(JSON.parse(String(init?.body))).toEqual({ route, category: "cafe,bakery", radius: 35, limit: 20, lang: "fr" });
+    expect(res.data[0]!.along).toBe(340);
+  });
+
+  it("leaves unset options out of the body", async () => {
+    let init: RequestInit | undefined;
+    const { places } = client((_, i) => {
+      init = i;
+      return envelope([]);
+    });
+    await places.along(route, "cafe");
+    expect(JSON.parse(String(init?.body))).toEqual({ route, category: "cafe" });
+  });
+
+  it("throws PlacesError with the gateway's reason", async () => {
+    const { places } = client(() =>
+      new Response(JSON.stringify({ error: "route is 140 km; at most 100 km", code: "bad_request" }), { status: 400 }),
+    );
+    await expect(places.along(route, "cafe")).rejects.toMatchObject({ status: 400, code: "bad_request" });
+    await expect(places.along(route, "cafe")).rejects.toBeInstanceOf(PlacesError);
+  });
+});

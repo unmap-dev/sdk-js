@@ -454,6 +454,21 @@
       ]
     },
     {
+      "name": "urban-noise-map",
+      "type": "registry:block",
+      "files": [
+        {
+          "type": "registry:page"
+        },
+        {
+          "type": "registry:ui"
+        },
+        {
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "energy-layer-control",
       "type": "registry:ui",
       "files": [
