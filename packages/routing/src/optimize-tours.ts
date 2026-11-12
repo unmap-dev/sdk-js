@@ -55,7 +55,10 @@ export interface OptimizeToursResult {
    * is billed like any other.
    */
   billableShipments: number;
-  /** True when your `timeout` was over the plan's cap and the gateway shortened it. */
+  /**
+   * True when your `timeout` was over the plan's cap and the gateway shortened it. The same fact
+   * also arrives as a `TIMEOUT_CLAMPED` entry in `warnings`; this field is the typed shortcut.
+   */
   timeoutClamped: boolean;
   /** The timeout the solve ran with, in seconds, when `timeoutClamped`; otherwise `null`. */
   clampedTimeoutSeconds: number | null;
@@ -178,7 +181,9 @@ export async function optimizeTours(request: OptimizeToursRequest, opts: Optimiz
   let response: OptimizeToursResponse;
   try {
     response = (await res.json()) as OptimizeToursResponse;
-  } catch {
+  } catch (error) {
+    // Aborted while the body was arriving: the caller's own cancellation, not a bad body.
+    if (opts.signal?.aborted) throw error;
     // A proxy or a captive portal can answer 200 with HTML; callers catch one error type.
     throw new UnmapOptimizeError(res.status, `optimize ${res.status} on /optimize: the response body is not JSON`);
   }

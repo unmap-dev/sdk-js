@@ -108,6 +108,21 @@ describe("optimizeTours", () => {
     expect(callOf(f)[1].signal).toBe(ctrl.signal);
   });
 
+  it("rethrows an abort during the body read rather than calling the body not JSON", async () => {
+    const ctrl = new AbortController();
+    const abort = new DOMException("The operation was aborted.", "AbortError");
+    const f = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      headers: new Headers(),
+      json: async () => {
+        ctrl.abort(abort);
+        throw abort;
+      },
+    })) as unknown as typeof fetch;
+    await expect(optimizeTours(REQUEST, { key: "k", fetch: f, signal: ctrl.signal })).rejects.toBe(abort);
+  });
+
   it("is also a method on Router, which shares the key, gateway and fetch", async () => {
     const f = stubFetch({});
     const out = await new Router({ key: "k2", gateway: "https://gw.example", fetch: f }).optimizeTours(REQUEST);

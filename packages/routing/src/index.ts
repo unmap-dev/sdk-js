@@ -875,6 +875,10 @@ export class Router {
    * `optimizeTours`, served by Unmap Optimize. See the standalone `optimizeTours()` for what it
    * resolves with and throws. This is `/optimized-route`'s bigger sibling: that one orders stops
    * for a single vehicle, this one plans a fleet.
+   *
+   * Unlike the other methods, which put the key in the query string (`?key=`), this one sends it
+   * in the `X-API-Key` header, as the standalone `optimizeTours()` does. The optimize paths also
+   * accept Google's own `X-Goog-Api-Key`, so a GMPRO client keeps its header.
    */
   optimizeTours(request: OptimizeToursRequest, opts: { signal?: AbortSignal } = {}): Promise<OptimizeToursResult> {
     return optimizeTours(request, { key: this.key, gateway: this.base, fetch: this.fetchImpl, retry: this.retry, signal: opts.signal });

@@ -24,3 +24,25 @@ throws status `503`, code `service_unavailable`, without falling back to another
 
 `@unmap/sdk` exposes the same object as `unmap.elevation`. Full documentation:
 <https://unmap.dev/docs/apis/elevation>.
+
+## Sight lines
+
+`@unmap/elevation/view` is the model the registry's `view-explorer` block runs: what a window can
+see over the terrain tiles, with the Earth's curve and standard refraction. It is pure functions;
+you supply the tile loader, so the browser decodes with `OffscreenCanvas` and Node with an image
+library. Take the tile template from a `terrain=on` style's `raster-dem` source.
+
+```ts
+import { fanRays, groundHeights, readRay, viewShare } from "@unmap/elevation/view";
+
+const home: [number, number] = [-114.2005, 51.0575];
+const rays = fanRays(home, { from: 200, to: 305, step: 3 }, 130_000, 72);
+const { ground, perRay } = await groundHeights(home, rays, loadTerrainTile);
+const results = rays.map((ray, i) => readRay(ray, perRay[i]!, ground!, ground! + 4.5));
+const share = viewShare(results); // 0 to 1 of the fan that reaches the mountains
+```
+
+Each tile is one billed `/terrain` call and is loaded once per `groundHeights` call however many
+samples fall in it; cache tiles in your loader to share them across homes. The terrain is bare
+ground in most Canadian cities, so buildings and trees do not block a view unless you add their
+heights to the samples.

@@ -1,6 +1,6 @@
 {
   "name": "@unmap/routing",
-  "version": "0.31.0",
+  "version": "0.32.0",
   "description": "Typed client for the unmap routing API (route + isochrone)",
   "license": "MIT",
   "keywords": [

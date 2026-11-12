@@ -1,10 +1,11 @@
 /**
  * Emits a JSON Schema (draft 2020-12) for OptimizeToursRequest from the field-status table, so the
  * schema and the validator cannot list different fields. Supported and ignored fields carry their
- * types; rejected and planned fields are present with their description and a schema that refuses
- * any value (`not: {}`), which is stricter than the validator only in one place: the validator also
- * accepts a planned field sent at its default value. Each property is listed in camelCase and,
- * where it differs, in snake_case, because the API accepts both.
+ * types; rejected and planned fields are present with their description and a schema that accepts
+ * only what the validator accepts for them: null, the row's GMPRO default, or (unless sending the
+ * field at all counts, `presenceCounts`) the value's zero, so a GMPRO client that serialises every
+ * field at its default validates against the schema as it does against the API. Each property is
+ * listed in camelCase and, where it differs, in snake_case, because the API accepts both.
  *
  * Cross-field rules (time window order, references, matrix shapes) are the validator's, not the
  * schema's.
@@ -19,6 +20,38 @@ export const JSON_SCHEMA_ID = "https://unmap.dev/schemas/optimize-tours-request.
 const INT_STRING = "^-?[0-9]+$";
 const DURATION = "^-?[0-9]+(\\.[0-9]{1,9})?s$";
 const TIMESTAMP = "^[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?([Zz]|[+-][0-9]{2}:[0-9]{2})$";
+
+/** `isEmptyValue` in validate.ts, as a schema: the zero of any JSON value, objects recursively. */
+const EMPTY_REF = "#/$defs/emptyValue";
+const EMPTY_VALUE: JsonSchema = {
+  anyOf: [
+    { type: "null" },
+    { const: false },
+    { const: 0 },
+    { type: "string", enum: ["", "0", "0s"] },
+    { type: "string", pattern: "_UNSPECIFIED$" },
+    { type: "array", maxItems: 0 },
+    { type: "object", additionalProperties: { $ref: EMPTY_REF } },
+  ],
+};
+
+/** `isDefaultValue` in validate.ts, as a schema: the values that mean "not sent" for this row. */
+function defaultOnly(row: FieldRow): JsonSchema {
+  const accepted: JsonSchema[] = [{ type: "null" }];
+  if (row.default !== undefined) accepted.push({ const: row.default });
+  if (!row.presenceCounts) {
+    if (row.repeated || row.map) {
+      accepted.push({ $ref: EMPTY_REF });
+    } else {
+      // A string's zero depends on what it encodes; any other value's zero is the generic one.
+      const zeroString: Partial<Record<FieldRow["type"], string>> = { enum: "_UNSPECIFIED$", int64: "^-?0+$", duration: "^-?0+(\\.0+)?s$" };
+      const pattern = zeroString[row.type];
+      accepted.push(pattern === undefined ? { const: "" } : { type: "string", anyOf: [{ const: "" }, { pattern }] });
+      accepted.push({ not: { type: "string" }, $ref: EMPTY_REF });
+    }
+  }
+  return { anyOf: accepted };
+}
 
 const toSnake = (name: string): string => name.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
 
@@ -72,7 +105,7 @@ function single(row: FieldRow): JsonSchema {
 
 function fieldSchema(row: FieldRow): JsonSchema {
   if (row.status !== "supported" && row.status !== "ignored") {
-    return { description: row.description, "x-unmap-status": row.status, not: {} };
+    return { description: row.description, "x-unmap-status": row.status, ...defaultOnly(row) };
   }
   let schema: JsonSchema;
   if (row.repeated) {
@@ -125,5 +158,6 @@ export function buildJsonSchema(): JsonSchema & { $schema: string; $id: string }
     description:
       "Request body for Unmap Optimize (POST /optimize and the GMPRO-compatible :optimizeTours paths), generated from @unmap/optimize-schema's field table.",
     ...objectSchema(""),
+    $defs: { emptyValue: EMPTY_VALUE },
   };
 }

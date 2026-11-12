@@ -1,5 +1,19 @@
 # @unmap/cli
 
+## 0.32.0
+
+### Patch Changes
+
+- @unmap/core@0.32.0
+- @unmap/geocoding@0.32.0
+
+## 0.31.1
+
+### Patch Changes
+
+- @unmap/core@0.31.1
+- @unmap/geocoding@0.31.1
+
 ## 0.31.0
 
 ### Minor Changes

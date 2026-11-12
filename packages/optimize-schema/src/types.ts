@@ -16,7 +16,11 @@
 export type Duration = string;
 /** RFC 3339 ("2026-10-12T08:00:00Z") or the object form with int64 seconds. */
 export type Timestamp = string | { seconds?: Int64; nanos?: number };
-/** A 64-bit integer as a decimal string or a safe JSON integer. */
+/**
+ * A 64-bit integer as a decimal string or a safe JSON integer. These types describe what a GMPRO
+ * client may send, so the string form stays; `validateRequest` returns every int64 field as a
+ * number, and code reading a validated request still goes through `parseInt64` to narrow it.
+ */
 export type Int64 = string | number;
 
 export type SolvingMode = "DEFAULT_SOLVE" | "VALIDATE_ONLY" | "DETECT_SOME_INFEASIBLE_SHIPMENTS" | "TRANSFORM_AND_RETURN_REQUEST";

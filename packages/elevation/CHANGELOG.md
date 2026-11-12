@@ -1,5 +1,26 @@
 # @unmap/elevation
 
+## 0.32.0
+
+### Minor Changes
+
+- 13e8a8c: Add `@unmap/elevation/view`, the sight-line model the `view-explorer` block runs, as pure functions
+  any app or batch job can import: sight lines over the Earth's curve with standard refraction,
+  `readRay` (is this line's skyline mountain or a nearer hill), `readTarget` (can a summit or tower
+  top be seen, and what blocks it), `groundHeights` (reads every sample from `/terrain` tiles, each
+  tile loaded once, through a loader you supply), `viewShare` and `widestBlock`. `fanAzimuths` and
+  `fanRays` take the fan explicitly, so a city other than Calgary passes its own arc, or all 360°.
+
+### Patch Changes
+
+- @unmap/core@0.32.0
+
+## 0.31.1
+
+### Patch Changes
+
+- @unmap/core@0.31.1
+
 ## 0.31.0
 
 ### Patch Changes

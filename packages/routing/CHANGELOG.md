@@ -1,5 +1,18 @@
 # @unmap/routing
 
+## 0.32.0
+
+### Patch Changes
+
+- @unmap/core@0.32.0
+
+## 0.31.1
+
+### Patch Changes
+
+- 58a9ab0: `optimizeTours()` rethrows the caller's own abort when it lands while the response body is being read, instead of reporting the body as not JSON. The conformance harness turns a non-JSON 200 into an error result instead of crashing, sends `--time-limit-ms` to a target as the request's `timeout`, counts skipped mandatory shipments from the request, notes a failed cost recomputation, exits 1 when every entry was skipped, and refuses an empty `--local-solver` or `--target`.
+  - @unmap/core@0.31.1
+
 ## 0.31.0
 
 ### Patch Changes
