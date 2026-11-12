@@ -1,5 +1,12 @@
 # @unmap/next
 
+## 0.31.0
+
+### Patch Changes
+
+- @unmap/sdk@0.31.0
+- @unmap/react@0.31.0
+
 ## 0.30.0
 
 ### Patch Changes

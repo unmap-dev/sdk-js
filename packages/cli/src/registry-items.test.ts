@@ -29,10 +29,7 @@ describe("REGISTRY_ITEMS", () => {
     ).items
       .filter((item) => item.type === "registry:block" && item.files.some((file) => file.type === "registry:page"))
       .map((item) => item.name);
-    const shipped = file === "registry.vue.json"
-      ? REGISTRY_BLOCKS.filter((name) => !(REACT_BLOCKS as readonly string[]).includes(name))
-      : REGISTRY_BLOCKS;
-    expect([...shipped]).toEqual(blocks);
+    expect([...REGISTRY_BLOCKS]).toEqual(blocks);
     for (const block of blocks) expect(REGISTRY_ITEMS).toContain(block);
   });
 });

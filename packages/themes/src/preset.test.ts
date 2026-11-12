@@ -53,7 +53,9 @@ describe("short presets", () => {
     const onBase = generateTheme("base", boreal.seeds);
     expect(await encodeTheme(onBase)).toBe("u4e");
     expect(registryThemeKey(onBase)).toBe("boreal");
-  });
+    // CPU-bound: 11.6 s on a shared CI runner. Vitest 2 never timed out a test
+    // that blocked the event loop; Vitest 4 fails it after the fact, so give it room.
+  }, 30_000);
 
   it("grows for custom seeds, then falls back to ut1. for advanced overrides", async () => {
     const custom = generateTheme("outdoor", CUSTOM_SEEDS);
@@ -169,7 +171,9 @@ describe("short presets", () => {
       if (printed.layers) expected.layers = printed.layers;
       expect(decodePreset(printed.code), printed.code).toEqual(expected);
     }
-  });
+    // CPU-bound: 8.8 s on a shared CI runner. Vitest 2 never timed out a test
+    // that blocked the event loop; Vitest 4 fails it after the fact, so give it room.
+  }, 30_000);
 
   it("still decodes every code the docs and the registry's map-themes item print", async () => {
     // The registry's MAP_THEMES table, plus `tamarack`, the one four-character preset code.

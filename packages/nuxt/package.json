@@ -1,6 +1,6 @@
 {
   "name": "@unmap/nuxt",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "description": "Nuxt 3 module for unmap: runtime config + auto-imported @unmap/vue composables",
   "license": "MIT",
   "keywords": [
@@ -51,6 +51,6 @@
     "@nuxt/schema": "^3.13.0",
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",
-    "vitest": "^2.1.0"
+    "vitest": "^4.1.12"
   }
 }

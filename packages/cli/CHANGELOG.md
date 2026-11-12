@@ -1,5 +1,16 @@
 # @unmap/cli
 
+## 0.31.0
+
+### Minor Changes
+
+- 1565ede: `unmap add alive-route-explorer` now installs in a Nuxt project too: the alive route explorer page block has its Vue lane, with `<UnmapAliveRouteExplorer>` at app/pages/alive-route-explorer.vue and its scoring files under lib/alive-route-explorer/. A Vue project no longer gets the React-only refusal for it.
+
+### Patch Changes
+
+- @unmap/core@0.31.0
+- @unmap/geocoding@0.31.0
+
 ## 0.30.0
 
 ### Minor Changes

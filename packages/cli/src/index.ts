@@ -18,11 +18,7 @@ export const DEFAULT_REGISTRY = "https://registry.unmap.dev";
 export const FRAMEWORKS = ["react", "vue"] as const;
 export type Framework = (typeof FRAMEWORKS)[number];
 
-/**
- * Items distributed in the React lane only: the templates and examples, and a page block whose Vue
- * lane has not shipped yet (alive-route-explorer; apps/registry/scripts/llms/pages.ts,
- * VUE_LANE_PENDING). `unmap add` refuses them in a Vue project.
- */
+/** Templates and examples currently distributed in the React lane. */
 export const REACT_BLOCKS = [
   "business-locator-01",
   "local-guide-01",
@@ -40,7 +36,6 @@ export const REACT_BLOCKS = [
   "map-heatmap-01",
   "map-arcs-01",
   "map-flows-01",
-  "alive-route-explorer",
 ] as const;
 
 /**
@@ -109,6 +104,7 @@ export const REGISTRY_ITEMS = [
   "ski-resort-explorer",
   "view-explorer",
   "urban-noise-map",
+  "alive-route-explorer",
   "energy-map",
   "energy-layer-control",
   "well-search",

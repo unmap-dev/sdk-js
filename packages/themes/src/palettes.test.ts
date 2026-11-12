@@ -14,7 +14,9 @@ describe("theme presets", () => {
         expect(contrastWarnings(doc), `${palette.name}/${base}`).toEqual([]);
       }
     }
-  });
+    // CPU-bound: 4.0 s on a shared CI runner. Vitest 2 never timed out a test
+    // that blocked the event loop; Vitest 4 fails it after the fact, so give it room.
+  }, 30_000);
 
   it("preset names are unique", () => {
     const names = THEME_PRESETS.map((p) => p.name);
@@ -43,5 +45,7 @@ describe("shuffleSeeds", () => {
         expect(contrastWarnings(doc), `seed ${i}/${base}`).toEqual([]);
       }
     }
-  });
+    // CPU-bound: 3.6 s on a shared CI runner. Vitest 2 never timed out a test
+    // that blocked the event loop; Vitest 4 fails it after the fact, so give it room.
+  }, 30_000);
 });

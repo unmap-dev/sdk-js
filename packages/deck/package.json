@@ -1,6 +1,6 @@
 {
   "name": "@unmap/deck",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "description": "deck.gl layers for unmap maps: 3D ski lifts on MapLibre terrain, interleaved in one WebGL context",
   "license": "MIT",
   "keywords": [
@@ -62,6 +62,6 @@
     "maplibre-gl": "^6.9.0",
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",
-    "vitest": "^2.1.0"
+    "vitest": "^4.1.12"
   }
 }

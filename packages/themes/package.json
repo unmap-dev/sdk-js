@@ -1,6 +1,6 @@
 {
   "name": "@unmap/themes",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "description": "unmap theme documents: types, recipes, validation, codec (data-only map themes)",
   "license": "MIT",
   "keywords": [
@@ -49,7 +49,7 @@
   "devDependencies": {
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",
-    "vitest": "^2.1.0"
+    "vitest": "^4.1.12"
   },
   "engines": {
     "node": ">=18"

@@ -795,7 +795,9 @@ describe("load type cap", () => {
   it("keeps a 100,000-key body to one error", () => {
     const { errors } = validateRequest({ model: { shipments: [{ ...delivery, loadDemands: demands(names(0, 100_000)) }] } });
     expect(errors).toHaveLength(1);
-  });
+    // CPU-bound: 6.9 s on a shared CI runner. Vitest 2 never timed out a test
+    // that blocked the event loop; Vitest 4 fails it after the fact, so give it room.
+  }, 30_000);
 });
 
 describe("integer bounds the solver can hold", () => {

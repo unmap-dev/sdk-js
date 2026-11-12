@@ -1,6 +1,6 @@
 {
   "name": "@unmap/core",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "description": "unmap tile math and gateway URL helpers (zero-dependency, isomorphic)",
   "license": "MIT",
   "keywords": [
@@ -45,6 +45,6 @@
   "devDependencies": {
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",
-    "vitest": "^2.1.0"
+    "vitest": "^4.1.12"
   }
 }
