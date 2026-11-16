@@ -1,5 +1,13 @@
 # @unmap/next
 
+## 0.32.1
+
+### Patch Changes
+
+- Updated dependencies [51737c1]
+  - @unmap/sdk@0.32.1
+  - @unmap/react@0.32.1
+
 ## 0.32.0
 
 ### Patch Changes

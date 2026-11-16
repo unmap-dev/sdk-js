@@ -117,16 +117,24 @@ describe("Byod.upload", () => {
     expect((seen[0]!.init?.headers as Record<string, string>)["content-type"]).toBe("application/geo+json");
   });
 
-  it("sends a Blob as multipart WITHOUT setting content-type by hand", async () => {
-    // Setting it would omit the multipart boundary and produce a request the server cannot parse.
-    // The runtime has to add the header itself.
+  it("sends a File as the raw body, named after the file, so the server can stream it", async () => {
+    // A multipart form is held whole by the server and capped lower; a raw body of known length
+    // is streamed to storage, which is how a PMTiles archive up to 100 MB gets through.
+    const { byod, seen } = client(() => json(OVERLAY, 201));
+    const file = new File([new Uint8Array([80, 77, 84, 105, 108, 101, 115])], "roads.pmtiles");
+    await byod.upload(file);
+    expect(seen[0]!.init?.body).toBe(file);
+    expect((seen[0]!.init?.headers as Record<string, string>)["content-type"]).toBe("application/octet-stream");
+    expect(seen[0]!.url.searchParams.get("filename")).toBe("roads.pmtiles");
+    expect(seen[0]!.url.searchParams.get("name")).toBe("roads");
+  });
+
+  it("keeps a Blob's own type, and a name the caller gives", async () => {
     const { byod, seen } = client(() => json(OVERLAY, 201));
     await byod.upload(new Blob(["{}"], { type: "application/geo+json" }), { name: "From a file input" });
-    expect(seen[0]!.init?.headers).toBeUndefined();
-    expect(seen[0]!.init?.body).toBeInstanceOf(FormData);
-    const form = seen[0]!.init?.body as FormData;
-    expect(form.get("name")).toBe("From a file input");
-    expect(form.get("file")).toBeInstanceOf(Blob);
+    expect((seen[0]!.init?.headers as Record<string, string>)["content-type"]).toBe("application/geo+json");
+    expect(seen[0]!.url.searchParams.get("name")).toBe("From a file input");
+    expect(seen[0]!.url.searchParams.has("filename")).toBe(false);
   });
 
   it("returns the record, so the byod: token is what a caller reaches for", async () => {

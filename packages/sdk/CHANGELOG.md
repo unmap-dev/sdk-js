@@ -1,5 +1,18 @@
 # @unmap/sdk
 
+## 0.32.1
+
+### Patch Changes
+
+- 51737c1: `byod.upload()` sends a `Blob` or `File` as the raw request body, with `?filename=` and a default
+  name from the file, instead of a multipart form. The gateway streams a raw body to storage, so
+  PMTiles archives up to 100 MB now upload; a form is held whole and capped at 50 MiB.
+  - @unmap/core@0.32.1
+  - @unmap/maps@0.32.1
+  - @unmap/geocoding@0.32.1
+  - @unmap/routing@0.32.1
+  - @unmap/elevation@0.32.1
+
 ## 0.32.0
 
 ### Patch Changes

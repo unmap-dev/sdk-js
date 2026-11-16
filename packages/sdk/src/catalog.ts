@@ -243,18 +243,20 @@ export class Byod extends KeyedClient {
     opts: { name?: string; kind?: "geojson" | "pmtiles"; signal?: AbortSignal } = {},
   ): Promise<ByodOverlay> {
     let payload: BodyInit;
-    let contentType: string | undefined;
+    let contentType: string;
     let name: string | undefined;
+    let filename: string | undefined;
 
     if (typeof Blob !== "undefined" && body instanceof Blob) {
-      // A File carries its own name, which is a better default than anything we could invent.
-      const form = new FormData();
-      form.append("file", body);
-      if (opts.name) form.append("name", opts.name);
-      payload = form;
-      // Deliberately unset: the runtime has to add the multipart boundary, and setting
-      // content-type by hand produces a request the server cannot parse.
-      contentType = undefined;
+      // Sent as the raw body, not a multipart form: the server streams a raw body of known length
+      // to storage, so it takes PMTiles up to 100 MB that way, and holds a form whole (50 MiB).
+      // A File's own name is the default display name and tells the server what kind it is.
+      filename = typeof File !== "undefined" && body instanceof File ? body.name : undefined;
+      name = opts.name ?? filename?.replace(/\.[^.]+$/, "");
+      contentType =
+        body.type ||
+        (opts.kind === "geojson" ? "application/geo+json" : opts.kind === "pmtiles" ? "application/vnd.pmtiles" : "application/octet-stream");
+      payload = body;
     } else if (body instanceof ArrayBuffer || ArrayBuffer.isView(body)) {
       payload = body as BodyInit;
       contentType = opts.kind === "geojson" ? "application/geo+json" : "application/vnd.pmtiles";
@@ -265,10 +267,10 @@ export class Byod extends KeyedClient {
       name = opts.name;
     }
 
-    const res = await this.fetchImpl(this.url("/byod", { name }), {
+    const res = await this.fetchImpl(this.url("/byod", { name, filename }), {
       method: "POST",
       signal: opts.signal,
-      headers: contentType ? { "content-type": contentType } : undefined,
+      headers: { "content-type": contentType },
       body: payload,
     });
     if (!res.ok) throw await errorFrom(res, "/byod");
