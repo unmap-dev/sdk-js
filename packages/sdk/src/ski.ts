@@ -24,7 +24,10 @@ export type SkiAspectDirection = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "n
 
 /** One ski area, as the gateway returns it (`apps/gateway/src/ski.ts`). */
 export interface SkiArea {
-  /** Stable OSM-derived id: `osm-way-<n>`, `osm-relation-<n>` or `osm-node-<n>`. */
+  /**
+   * Stable OSM-derived id: `osm-way-<n>`, `osm-relation-<n>` or `osm-node-<n>` for an area with an OSM
+   * ski-area object; `osm-cluster-way-<n>` for runs and lifts with none, `n` their lowest lift way.
+   */
   id: string;
   name: string;
   /** Two-letter province or territory code, or "" when the area could not be placed. */
@@ -52,6 +55,12 @@ export interface SkiArea {
    * more. Null when none is within the routing engine's matrix limit.
    */
   drive: { from: string; minutes: number } | null;
+  /**
+   * Where `name` came from: the OSM element, or for an area OSM leaves unnamed, a Wikidata item
+   * (CC0-1.0) or a BC Ski Resorts record (OGL-BC-2.0). Null when the area has no name. Absent from
+   * releases built before 2026-11-16.
+   */
+  name_source?: { source: "openstreetmap" | "wikidata" | "bc-ski-resorts"; id: string; licence: string } | null;
   source: string;
   licence: string;
 }
