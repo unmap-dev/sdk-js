@@ -1,5 +1,17 @@
 # @unmap/elevation
 
+## 0.33.0
+
+### Patch Changes
+
+- @unmap/core@0.33.0
+
+## 0.32.2
+
+### Patch Changes
+
+- @unmap/core@0.32.2
+
 ## 0.32.1
 
 ### Patch Changes

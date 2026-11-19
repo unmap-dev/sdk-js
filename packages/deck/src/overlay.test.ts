@@ -100,6 +100,35 @@ describe("createDeckOverlay", () => {
     expect(removed).toEqual([handle.overlay]);
   });
 
+  it("shares one overlay between every handle on a map, each with its own layers", () => {
+    // deck.gl throws on a second interleaved overlay on the same map.
+    const { map, added, removed } = fakeMap();
+    const cables = liftCablesLayer(doc);
+    const trees = liftCablesLayer(doc, { id: "trees" });
+    const lifts = createDeckOverlay(map, { layers: [cables] });
+    const forest = createDeckOverlay(map, { layers: [trees] });
+    expect(added).toHaveLength(1);
+    expect(forest.overlay).toBe(lifts.overlay);
+    expect(inside(lifts.overlay)._props.layers).toEqual([cables, trees]);
+
+    const wider = liftCablesLayer(doc, { width: 4 });
+    lifts.setLayers([wider]);
+    expect(inside(lifts.overlay)._props.layers).toEqual([wider, trees]);
+
+    lifts.remove();
+    expect(removed).toEqual([]);
+    expect(inside(forest.overlay)._props.layers).toEqual([trees]);
+    lifts.setLayers([cables]);
+    expect(inside(forest.overlay)._props.layers).toEqual([trees]);
+
+    forest.remove();
+    expect(removed).toEqual([forest.overlay]);
+    // The next handle starts a new overlay.
+    const again = createDeckOverlay(map);
+    expect(added).toHaveLength(2);
+    expect(again.overlay).not.toBe(forest.overlay);
+  });
+
   it("warns once per map when the map was created without antialiasing", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const { map } = fakeMap(false);

@@ -1,7 +1,7 @@
 # @unmap/deck
 
-deck.gl layers for unmap maps: 3D ski lifts on MapLibre terrain, drawn in MapLibre's own WebGL
-context (deck.gl interleaved mode).
+deck.gl layers for unmap maps: 3D ski lifts and the basemap's woods as 3D trees on MapLibre
+terrain, drawn in MapLibre's own WebGL context (deck.gl interleaved mode).
 
 ```sh
 npm i @unmap/deck @unmap/maps maplibre-gl @deck.gl/core @deck.gl/layers @deck.gl/mesh-layers @deck.gl/maplibre @luma.gl/core
@@ -24,7 +24,9 @@ map.on("load", async () => {
 
 - `createDeckOverlay(map, opts?)` adds an interleaved `MapLibreOverlay` and returns
   `{ overlay, setLayers(layers), remove() }`. It is always interleaved: one WebGL context, with
-  depth shared with the terrain.
+  depth shared with the terrain. deck.gl allows one interleaved overlay per map, so calling it
+  again on the same map shares that overlay: each handle sets and removes only its own layers
+  (keep ids unique across them), and the overlay comes off with the last handle.
 - `deckMapOptions` is `{ canvasContextAttributes: { antialias: true } }`. MapLibre creates its
   context with antialiasing off, which gives cables hard edges, and the setting can only be
   chosen when the map is created. Pass it as `createMap`'s `maplibre` option.
@@ -45,6 +47,18 @@ map.on("load", async () => {
   `schema_mismatch`, when the body is not an `unmap.ski-lifts-3d.v1` document. The key goes
   in the gateway URL only.
 - `bakedZ(point, exaggeration = 1)` gives the height to draw a baked point at.
+- `showTrees(map, opts?)` draws the basemap's woods (`landuse` `wood` and `forest`) as low-poly
+  conifers standing on the terrain and returns the function that takes them off. From zoom 13.5
+  (`TREES_MIN_ZOOM`) in, within 4 km of the ground the camera looks at, one `SimpleMeshLayer` per
+  z14 tile through `createDeckOverlay`, so it shares the overlay with any lifts. Water and
+  buildings are cut out and strips cleared along roads, railways and rivers, and along
+  `SKI_TREE_CLEARANCE` (the `ski` overlay's runs and lifts, skipped on a map without it); pass
+  `clear` to clear your own lines instead. Nothing is fetched: it reads the tiles the map has
+  loaded and the terrain it draws, so it needs `terrain` but neither `exaggeration` nor
+  `deckMapOptions`. `budget` caps the trees (180,000, or 60,000 on a touch screen), `beforeId`
+  sets the layer they draw under (the first label layer), and `onCount` reports how many are
+  drawn. Call it again after a style swap. Placement is seeded by position, so the same woods
+  look the same on every visit; it is a picture of woodland, not a forest inventory.
 
 ## Heights and terrain exaggeration
 
@@ -69,4 +83,4 @@ a peer dependency (`~9.4.0`) and is never bundled. `fetchLifts3d`, `bakedZ` and
 `deckMapOptions` import no renderer at runtime, and the package is `sideEffects: false`.
 Load the layers with a dynamic `import("@unmap/deck")` when the user turns 3D on.
 
-The lift data needs the `ski` add-on. The renderers are free.
+The lift data needs the `ski` add-on. The renderers, the trees included, are free.

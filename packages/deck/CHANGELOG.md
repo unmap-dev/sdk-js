@@ -1,5 +1,22 @@
 # @unmap/deck
 
+## 0.33.0
+
+### Minor Changes
+
+- ae11bf3: `showTrees(map)` draws the basemap's woods as low-poly 3D conifers standing on the terrain, from zoom 13.5 in, near the camera, with water and buildings cut out and strips cleared along roads, railways, rivers and the `ski` overlay's runs and lifts (`SKI_TREE_CLEARANCE`, or your own lines through `clear`). It fetches nothing: trees are placed from the vector tiles the map has loaded, at heights read from the terrain it draws, and share the map's one deck.gl overlay with any 3D lifts. Placement is seeded by position, so the same woods look the same on every visit. Also exports `TREES_MIN_ZOOM`.
+
+### Patch Changes
+
+- @unmap/core@0.33.0
+
+## 0.32.2
+
+### Patch Changes
+
+- 2145758: `createDeckOverlay` can be called more than once on the same map. deck.gl allows a single interleaved overlay per map and threw on a second one; now every handle draws through the same `MapLibreOverlay`, each owning its own layers, and the overlay comes off the map with the last handle. Winter's 3D trees and 3D lifts draw together this way.
+  - @unmap/core@0.32.2
+
 ## 0.32.1
 
 ### Patch Changes

@@ -1,5 +1,25 @@
 # @unmap/sdk
 
+## 0.33.0
+
+### Patch Changes
+
+- @unmap/core@0.33.0
+- @unmap/maps@0.33.0
+- @unmap/geocoding@0.33.0
+- @unmap/routing@0.33.0
+- @unmap/elevation@0.33.0
+
+## 0.32.2
+
+### Patch Changes
+
+- @unmap/core@0.32.2
+- @unmap/maps@0.32.2
+- @unmap/geocoding@0.32.2
+- @unmap/routing@0.32.2
+- @unmap/elevation@0.32.2
+
 ## 0.32.1
 
 ### Patch Changes

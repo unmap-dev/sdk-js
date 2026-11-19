@@ -1,5 +1,6 @@
 /**
- * @unmap/deck: deck.gl layers for unmap maps, interleaved in MapLibre's WebGL context.
+ * @unmap/deck: deck.gl layers for unmap maps, interleaved in MapLibre's WebGL context: 3D ski lifts,
+ * and the basemap's woods as 3D trees.
  *
  * Optional and separate from @unmap/maps, so a plain map never loads deck.gl. `fetchLifts3d`,
  * `bakedZ` and `deckMapOptions` import no renderer, and the package is `sideEffects: false`, so a
@@ -22,6 +23,7 @@ export {
   type LiftModelsLayerOptions,
   type LiftsInput,
 } from "./layers";
+export { SKI_TREE_CLEARANCE, TREES_MIN_ZOOM, showTrees, type ShowTreesOptions, type TreeClearance } from "./show-trees";
 export { createDeckOverlay, type DeckOverlay, type DeckOverlayMap, type DeckOverlayOptions } from "./overlay";
 
 // Re-exported so `catch (e) { if (e instanceof UnmapError) }` works without adding @unmap/core.

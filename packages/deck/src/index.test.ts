@@ -8,6 +8,8 @@ describe("@unmap/deck exports", () => {
       [
         "LIFTS_3D_SCHEMA",
         "LIFT_COLORS",
+        "SKI_TREE_CLEARANCE",
+        "TREES_MIN_ZOOM",
         "Lifts3dError",
         "UnmapError",
         "bakedZ",
@@ -17,6 +19,7 @@ describe("@unmap/deck exports", () => {
         "liftCablesLayer",
         "liftModelInstances",
         "liftModelsLayer",
+        "showTrees",
       ].sort(),
     );
   });
@@ -24,7 +27,7 @@ describe("@unmap/deck exports", () => {
   it("keeps fetch, bakedZ and deckMapOptions free of deck.gl and maplibre-gl at runtime", () => {
     // These three are what a page needs before it decides to load the 3D layer, so they must
     // not drag the renderers in. Type-only imports are erased and do not count.
-    for (const file of ["fetch.ts", "geometry.ts", "options.ts", "types.ts"]) {
+    for (const file of ["fetch.ts", "geometry.ts", "options.ts", "types.ts", "trees.ts"]) {
       const src = readFileSync(new URL(`./${file}`, import.meta.url), "utf8");
       const runtime = src.split("\n").filter((l) => /^\s*import\s/.test(l) && !/^\s*import\s+type\s/.test(l));
       for (const line of runtime) expect(line).not.toMatch(/@deck\.gl|@luma\.gl|maplibre-gl/);
