@@ -1,5 +1,11 @@
 # @unmap/vue
 
+## 0.34.0
+
+### Patch Changes
+
+- @unmap/sdk@0.34.0
+
 ## 0.33.0
 
 ### Patch Changes

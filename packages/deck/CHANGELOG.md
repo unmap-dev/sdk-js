@@ -1,5 +1,11 @@
 # @unmap/deck
 
+## 0.34.0
+
+### Patch Changes
+
+- @unmap/core@0.34.0
+
 ## 0.33.0
 
 ### Minor Changes

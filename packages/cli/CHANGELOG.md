@@ -1,5 +1,14 @@
 # @unmap/cli
 
+## 0.34.0
+
+### Patch Changes
+
+- Updated dependencies [dc33fef]
+- Updated dependencies [dc33fef]
+  - @unmap/geocoding@0.34.0
+  - @unmap/core@0.34.0
+
 ## 0.33.0
 
 ### Patch Changes

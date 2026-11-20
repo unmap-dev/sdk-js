@@ -1,5 +1,16 @@
 # @unmap/geocoding
 
+## 0.34.0
+
+### Minor Changes
+
+- dc33fef: Every geocoding method takes `country` (`"CA"`, `"US"`, `"MX"`, or a list), and `structured()` reads `region` and `postalcode` in that country's rules: `region: "CA"` is California under `country: "US"`, and ZIP codes keep their leading zero. New exports `COUNTRY_CODES`, `parseCountry`, `parseCountryList`, `parseSubdivision`, `parsePostalCode`, `subdivisionCodes` and `subdivisionForms`. Geocoding still covers Canada only: a country it has not released rejects with status 422 and code `outside_coverage`.
+
+### Patch Changes
+
+- dc33fef: `GeocodeResult.address` gains two optional fields, `district` (a colonia or other asentamiento) and `municipality` (a municipio or alcaldía), for Mexican results. Mexico is not a released country yet, so no result from `api.unmap.dev` carries them today, and Canadian results never do.
+  - @unmap/core@0.34.0
+
 ## 0.33.0
 
 ### Patch Changes
